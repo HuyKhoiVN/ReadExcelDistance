@@ -1,0 +1,88 @@
+{
+  "Version": 1,
+  "ManifestType": "Build",
+  "Endpoints": [
+    {
+      "Route": "Danh_sach_ATM_no_headers.xlsx",
+      "AssetFile": "Danh_sach_ATM_no_headers.xlsx",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "no-cache"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9412"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"e6PRQMKKrq+03FIerWhGrZCjT+J/8mF5TkPxn3+xZx8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 07 Mar 2025 03:31:21 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "integrity",
+          "Value": "sha256-e6PRQMKKrq+03FIerWhGrZCjT+J/8mF5TkPxn3+xZx8="
+        }
+      ]
+    },
+    {
+      "Route": "Danh_sach_ATM_no_headers.xxccslogj6.xlsx",
+      "AssetFile": "Danh_sach_ATM_no_headers.xlsx",
+      "Selectors": [],
+      "ResponseHeaders": [
+        {
+          "Name": "Accept-Ranges",
+          "Value": "bytes"
+        },
+        {
+          "Name": "Cache-Control",
+          "Value": "max-age=31536000, immutable"
+        },
+        {
+          "Name": "Content-Length",
+          "Value": "9412"
+        },
+        {
+          "Name": "Content-Type",
+          "Value": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        },
+        {
+          "Name": "ETag",
+          "Value": "\"e6PRQMKKrq+03FIerWhGrZCjT+J/8mF5TkPxn3+xZx8=\""
+        },
+        {
+          "Name": "Last-Modified",
+          "Value": "Fri, 07 Mar 2025 03:31:21 GMT"
+        }
+      ],
+      "EndpointProperties": [
+        {
+          "Name": "fingerprint",
+          "Value": "xxccslogj6"
+        },
+        {
+          "Name": "integrity",
+          "Value": "sha256-e6PRQMKKrq+03FIerWhGrZCjT+J/8mF5TkPxn3+xZx8="
+        },
+        {
+          "Name": "label",
+          "Value": "Danh_sach_ATM_no_headers.xlsx"
+        }
+      ]
+    }
+  ]
+}
