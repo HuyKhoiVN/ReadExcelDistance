@@ -21,10 +21,13 @@ namespace ReadExcelProcess.Service
         public (List<double> MaintenanceTimes, List<List<double>> TravelTimes) GetExcelData(IFormFile file)
         {
             if (file == null || file.Length == 0)
-                throw new ArgumentException("File is empty or not provided.");
+                throw new ArgumentException("File không hợp lệ.");
 
             if (Path.GetExtension(file.FileName).ToLower() != ".xlsx")
-                throw new ArgumentException("Invalid file format. Please upload an Excel file (.xlsx).");
+                throw new ArgumentException("Vui lòng tải lên file Excel (.xlsx).");
+
+            // 👉 Gọi AssignmentService để tải file lên
+            _assignmentService.LoadAssignmentsFromExcel(file);
 
             using var stream = new MemoryStream();
             file.CopyTo(stream);
@@ -64,6 +67,7 @@ namespace ReadExcelProcess.Service
 
             return (maintenanceTimes, travelTimes);
         }
+
 
         public async Task<byte[]> GetFile(IFormFile file)
         {
@@ -147,8 +151,8 @@ namespace ReadExcelProcess.Service
 
                 var worksheet = package.Workbook.Worksheets.Add(sheetName);
 
-                worksheet.Cells[1, 1].Value = "Location";
-                worksheet.Cells[1, 2].Value = "RepairTime";
+                worksheet.Cells[1, 1].Value = "Vị trí";
+                worksheet.Cells[1, 2].Value = "Thời gian sửa chữa";
 
                 int row = 2;
                 if (repairPerson.assignments != null)
@@ -160,10 +164,15 @@ namespace ReadExcelProcess.Service
                         row++;
                     }
                 }
-                worksheet.Cells[row + 1, 1].Value = "TotalWorkTime";
+                worksheet.Cells[row + 1, 1].Value = "Tổng thời gian làm việc";
                 worksheet.Cells[row + 1, 2].Value = repairPerson.TotalWorkTime;
+
+                // 👉 Định dạng cột để hỗ trợ Unicode tốt hơn
+                worksheet.Cells.AutoFitColumns();
             }
+
             return package.GetAsByteArray();
         }
+
     }
 }

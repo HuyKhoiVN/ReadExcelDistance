@@ -5,62 +5,60 @@ namespace ReadExcelProcess.Service
 {
     public class AssignmentService : IAssignmentService
     {
-        private readonly IWebHostEnvironment _env;
         private readonly Dictionary<int, Assignment> _assignmentMapping;
 
-        public AssignmentService(IWebHostEnvironment env)
+        public AssignmentService()
         {
-            _env = env;
             _assignmentMapping = new Dictionary<int, Assignment>();
-            LoadAssignmentsFromExcel();
         }
 
-        private void LoadAssignmentsFromExcel()
+        public void LoadAssignmentsFromExcel(IFormFile file)
         {
-            var filePath = Path.Combine(_env.WebRootPath, "Danh_sach_ATM_no_headers.xlsx");
-            if (!File.Exists(filePath))
+            if (file == null || file.Length == 0)
             {
-                throw new FileNotFoundException("Không tìm thấy file Danh_sach_ATM_no_headers.xlsx trong wwwroot");
+                throw new ArgumentException("File Excel không hợp lệ hoặc rỗng.");
             }
+
+            using var stream = new MemoryStream();
+            file.CopyTo(stream);
+            stream.Position = 0;
+
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using (var package = new ExcelPackage(new FileInfo(filePath)))
+            using var package = new ExcelPackage(stream);
+            var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+            if (worksheet == null)
+                throw new Exception("Không tìm thấy worksheet nào trong file Excel.");
+
+            int row = 1;
+            while (worksheet.Cells[row, 1].Value != null)
             {
-                var worksheet = package.Workbook.Worksheets.FirstOrDefault();
-                if (worksheet == null)
-                    throw new Exception("Không tìm thấy worksheet nào trong file Excel");
-
-                int row = 1;
-                while (worksheet.Cells[row, 1].Value != null)
+                try
                 {
-                    try
-                    {
-                        string location = worksheet.Cells[row, 1].Value.ToString();
-                        decimal repairTime = decimal.Parse(worksheet.Cells[row, 2].Value.ToString());
+                    string location = worksheet.Cells[row, 1].Value.ToString();
+                    decimal repairTime = decimal.Parse(worksheet.Cells[row, 2].Value.ToString());
 
-                        var assignment = new Assignment
-                        {
-                            Id = Guid.NewGuid().ToString(),
-                            Location = location,
-                            RepairTime = repairTime,
-                            RepairPersonId = null  
-                        };
-
-                        _assignmentMapping[row] = assignment;
-                    }
-                    catch (Exception ex)
+                    var assignment = new Assignment
                     {
-                        Console.WriteLine($"Lỗi tại dòng {row}: {ex.Message}");
-                    }
-                    row++;
+                        Id = Guid.NewGuid().ToString(),
+                        Location = location,
+                        RepairTime = repairTime,
+                        RepairPersonId = null
+                    };
+
+                    _assignmentMapping[row] = assignment;
                 }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Lỗi tại dòng {row}: {ex.Message}");
+                }
+                row++;
             }
         }
-
 
         public Assignment GetAssignmentByTaskId(int taskId)
         {
-            _assignmentMapping.TryGetValue(taskId, out var assignment);
-            return assignment;
+            return _assignmentMapping.TryGetValue(taskId, out var assignment) ? assignment : null;
         }
     }
+
 }
