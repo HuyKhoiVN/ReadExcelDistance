@@ -1,14 +1,22 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\HuyKhoi\\NET_CS\\ReadExcel\\",
+  "WorkspaceRootPath": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{824B582E-DB18-42A4-A5B7-D14C91635FDC}|ReadExcel\\ReadExcel.csproj|d:\\huykhoi\\net_cs\\readexcel\\readexcel\\controllers\\excelcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{824B582E-DB18-42A4-A5B7-D14C91635FDC}|ReadExcel\\ReadExcel.csproj|solutionrelative:readexcel\\controllers\\excelcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|d:\\huykhoi\\net_cs\\excelprocess\\readexceldistance\\readexcelprocess\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|solutionrelative:readexcelprocess\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{824B582E-DB18-42A4-A5B7-D14C91635FDC}|ReadExcel\\ReadExcel.csproj|d:\\huykhoi\\net_cs\\readexcel\\readexcel\\service\\excelservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{824B582E-DB18-42A4-A5B7-D14C91635FDC}|ReadExcel\\ReadExcel.csproj|solutionrelative:readexcel\\service\\excelservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|d:\\huykhoi\\net_cs\\excelprocess\\readexceldistance\\readexcelprocess\\controllers\\excelcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|solutionrelative:readexcelprocess\\controllers\\excelcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|d:\\huykhoi\\net_cs\\excelprocess\\readexceldistance\\readexcelprocess\\views\\excel\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|solutionrelative:readexcelprocess\\views\\excel\\index.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|d:\\huykhoi\\net_cs\\excelprocess\\readexceldistance\\readexcelprocess\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{854B0842-86BD-4779-9CEB-413178E92DE1}|ReadExcelProcess\\ReadExcelProcess.csproj|solutionrelative:readexcelprocess\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -30,28 +38,53 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "ReadExcelProcess\\Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "ReadExcelProcess\\Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAAAoAAAAHAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-10T06:35:31.144Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Index.cshtml",
+              "DocumentMoniker": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Views\\Excel\\Index.cshtml",
+              "RelativeDocumentMoniker": "ReadExcelProcess\\Views\\Excel\\Index.cshtml",
+              "ToolTip": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Views\\Excel\\Index.cshtml",
+              "RelativeToolTip": "ReadExcelProcess\\Views\\Excel\\Index.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-03-10T04:27:52.34Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ExcelController.cs",
-              "DocumentMoniker": "D:\\HuyKhoi\\NET_CS\\ReadExcel\\ReadExcel\\Controllers\\ExcelController.cs",
-              "RelativeDocumentMoniker": "ReadExcel\\Controllers\\ExcelController.cs",
-              "ToolTip": "D:\\HuyKhoi\\NET_CS\\ReadExcel\\ReadExcel\\Controllers\\ExcelController.cs",
-              "RelativeToolTip": "ReadExcel\\Controllers\\ExcelController.cs",
-              "ViewState": "AgIAAAMAAAAAAAAAAAAAABoAAAANAAAAAAAAAA==",
+              "Title": "Program.cs",
+              "DocumentMoniker": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Program.cs",
+              "RelativeDocumentMoniker": "ReadExcelProcess\\Program.cs",
+              "ToolTip": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Program.cs",
+              "RelativeToolTip": "ReadExcelProcess\\Program.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAiwCAAAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T03:42:21.732Z",
+              "WhenOpened": "2025-03-10T04:27:27.567Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "ExcelService.cs",
-              "DocumentMoniker": "D:\\HuyKhoi\\NET_CS\\ReadExcel\\ReadExcel\\Service\\ExcelService.cs",
-              "RelativeDocumentMoniker": "ReadExcel\\Service\\ExcelService.cs",
-              "ToolTip": "D:\\HuyKhoi\\NET_CS\\ReadExcel\\ReadExcel\\Service\\ExcelService.cs",
-              "RelativeToolTip": "ReadExcel\\Service\\ExcelService.cs",
-              "ViewState": "AgIAAAEAAAAAAAAAAAAAwA8AAAAgAAAAAAAAAA==",
+              "Title": "ExcelController.cs",
+              "DocumentMoniker": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Controllers\\ExcelController.cs",
+              "RelativeDocumentMoniker": "ReadExcelProcess\\Controllers\\ExcelController.cs",
+              "ToolTip": "D:\\HuyKhoi\\NET_CS\\Excelprocess\\ReadExcelDistance\\ReadExcelProcess\\Controllers\\ExcelController.cs",
+              "RelativeToolTip": "ReadExcelProcess\\Controllers\\ExcelController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABgAAAAPAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-03-07T03:36:38.513Z",
+              "WhenOpened": "2025-03-10T04:12:31.557Z",
               "EditorCaption": ""
             }
           ]

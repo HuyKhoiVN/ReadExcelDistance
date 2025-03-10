@@ -1,0 +1,59 @@
+﻿@{
+    ViewData["Title"] = "Import File";
+}
+
+<div class="container mt-5">
+    <div class="row d-flex align-items-center justify-content-center">
+        <!-- Left Side: File Upload -->
+        <div class="col-md-5 d-flex flex-column align-items-center">
+            <h2 class="text-center mb-4">Upload File</h2>
+            <form id="uploadForm" enctype="multipart/form-data" class="w-100">
+                <div class="mb-3">
+                    <label for="fileInput" class="form-label">Choose File</label>
+                    <input class="form-control" type="file" id="fileInput" name="file" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Upload</button>
+            </form>
+        </div>
+
+        <!-- Right Side: Uploaded File Details -->
+        <div class="col-md-5 d-flex flex-column align-items-center">
+            <h2 class="text-center mb-4">Uploaded File</h2>
+            <div id="fileInfo" class="border p-4 w-100 text-center">No file uploaded yet.</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $("#uploadForm").submit(function (event) {
+            event.preventDefault();
+            var formData = new FormData();
+            var fileInput = $("#fileInput")[0].files[0];
+
+            if (!fileInput) {
+                alert("Please select a file to upload.");
+                return;
+            }
+
+            formData.append("file", fileInput);
+
+            $.ajax({
+                url: sysUrl + "/api/Excel/data",
+                type: "POST",
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    $("#fileInfo").html(
+                        `<p><strong>File Name:</strong> ${response.fileName}</p>
+                         <p><strong>File Size:</strong> ${response.fileSize} bytes</p>`
+                    );
+                },
+                error: function (xhr, status, error) {
+                    $("#fileInfo").html(`<p class='text-danger'>Error uploading file.</p>`);
+                }
+            });
+        });
+    });
+</script>
