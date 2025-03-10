@@ -16,8 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddTransient<IRepairPersonRepository, RepairPersonRepository>();
 builder.Services.AddTransient<IAssignmentService, AssignmentService>();
-builder.Services.AddTransient<IOptimizationService, OptimizationService>();
-builder.Services.AddTransient<IExportService, ExportService>();
+builder.Services.AddTransient<IExcelService, ExcelService>();
 
 var app = builder.Build();
 

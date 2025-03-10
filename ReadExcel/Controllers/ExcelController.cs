@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using ReadExcel.Service;
 
 namespace ReadExcel.Controllers
@@ -8,11 +7,11 @@ namespace ReadExcel.Controllers
     [ApiController]
     public class ExcelController : ControllerBase
     {
-        private readonly ExcelService _excelService;
+        private readonly IExcelService _excelService;
 
-        public ExcelController()
+        public ExcelController(IExcelService excelService)
         {
-            _excelService = new ExcelService();
+            _excelService = excelService;
         }
 
         [HttpPost("data")]
@@ -27,6 +26,17 @@ namespace ReadExcel.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
+
+        [HttpPost("import")]
+        public async Task<IActionResult> ImportOptimizationData(IFormFile file)
+        {
+            var data = await _excelService.GetFile(file);
+            return File(
+                    data,
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    "Report.xlsx"
+                );
         }
     }
 }
