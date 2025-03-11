@@ -65,7 +65,7 @@ namespace ReadExcelProcess.Service
                 travelTimes.Add(row);
             }
 
-            return (maintenanceTimes, travelTimes);
+             return (maintenanceTimes, travelTimes);
         }
 
 
@@ -86,8 +86,8 @@ namespace ReadExcelProcess.Service
             }
             InputTest inputTest = new InputTest
             {
-                work_times = workTimes,
-                travel_times = travelArray,
+                work_times = maintenanceTimes.ToArray(),
+                travel_times = travelTimes.Select(x => x.ToArray()).ToArray(),
                 num_workers = 3,
                 delta = 1
             };

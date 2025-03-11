@@ -45,7 +45,7 @@ namespace ReadExcelProcess.Service
                         RepairPersonId = null
                     };
 
-                    _assignmentMapping[row] = assignment;
+                    _assignmentMapping[row - 1] = assignment;
                 }
                 catch (Exception ex)
                 {

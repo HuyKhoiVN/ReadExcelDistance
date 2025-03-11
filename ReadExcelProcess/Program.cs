@@ -10,6 +10,8 @@ builder.Services.AddHttpClient();
 builder.Services.AddTransient<IRepairPersonRepository, RepairPersonRepository>();
 builder.Services.AddTransient<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<IExcelService, ExcelService>();
+builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
+builder.Services.AddTransient<IGeoCodingService, GeoCodingService>();
 
 var app = builder.Build();
 

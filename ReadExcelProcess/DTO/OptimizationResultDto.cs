@@ -15,8 +15,8 @@
 
     public class InputTest
     {
-        public List<int> work_times { get; set; }
-        public int[,] travel_times { get; set; }
+        public double[] work_times { get; set; }
+        public double[][] travel_times { get; set; }
         public int num_workers { get; set; }
         public int delta { get; set; }
     }
