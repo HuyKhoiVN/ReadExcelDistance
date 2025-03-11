@@ -10,8 +10,9 @@ namespace ReadExcelProcess.Controllers
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
 
-        public ExcelController(IExcelService excelService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService)
         {
+            _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
         }
 
@@ -46,8 +47,8 @@ namespace ReadExcelProcess.Controllers
                 );
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetDistanceMatrix([FromQuery] List<string> addressList)
+        [HttpPost("api/GetDistanceMatrix")]
+        public async Task<IActionResult> GetDistanceMatrix([FromBody] List<string> addressList)
         {
             if (addressList == null || addressList.Count < 2)
                 return BadRequest("Cần ít nhất 2 điểm để tính khoảng cách.");

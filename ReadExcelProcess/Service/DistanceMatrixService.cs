@@ -2,6 +2,7 @@
 using ReadExcelProcess.Constant;
 using ReadExcelProcess.DTO;
 using ReadExcelProcess.Models;
+using System.Globalization;
 using System.Text.Json;
 
 namespace ReadExcelProcess.Service
@@ -59,17 +60,23 @@ namespace ReadExcelProcess.Service
 
         private async Task<List<double>> GetTravelTime(Location origin, List<Location> destinations)
         {
-            string originParam = $"{origin.Latitude},{origin.Longitude}";
-            string destinationsParam = string.Join("%7C", destinations.Select(d => $"{d.Latitude},{d.Longitude}"));
+            string originParam = $"{origin.Latitude.ToString(CultureInfo.InvariantCulture)},{origin.Longitude.ToString(CultureInfo.InvariantCulture)}";
+            string destinationsParam = string.Join("|", destinations.Select(d => $"{d.Latitude.ToString(CultureInfo.InvariantCulture)},{d.Longitude.ToString(CultureInfo.InvariantCulture)}"));
 
-            string url = $"{ReadExcelConstant.APIURL}?origins={originParam}&destinations={destinationsParam}&vehicle=car&api_key={ReadExcelConstant.APIKEY}";
+            string url = $"{ReadExcelConstant.APIURL}distancematrix?origins={originParam}&destinations={destinationsParam}&vehicle=car&api_key={ReadExcelConstant.APIKEY}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
                 return new List<double>(new double[destinations.Count]);
 
             string json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<DistanceMatrixResponse>(json);
+            // map obj
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var result = JsonSerializer.Deserialize<DistanceMatrixResponse>(json, options);
+
 
             List<double> travelTimes = new();
             if (result?.Rows?.Count > 0)
