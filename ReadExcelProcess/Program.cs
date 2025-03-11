@@ -1,9 +1,9 @@
-﻿using ReadExcelProcess.Repositories;
+﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using ReadExcelProcess.Repositories;
 using ReadExcelProcess.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient();
@@ -11,15 +11,19 @@ builder.Services.AddTransient<IRepairPersonRepository, RepairPersonRepository>()
 builder.Services.AddTransient<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
-builder.Services.AddTransient<IGeoCodingService, GeoCodingService>();
-
+//builder.Services.AddTransient<IGeoCodingService, GeoCodingService>();
+builder.Services.AddHttpClient<GeoCodingService>();
+builder.Services.AddTransient<IGeoCodingService>(ge =>
+{
+    var httpClientFactory = ge.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient(nameof(GeoCodingService));
+    return new GeoCodingService(httpClient);
+});
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
