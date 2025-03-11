@@ -9,10 +9,12 @@ namespace ReadExcelProcess.Service
     public class DistanceMatrixService : IDistanceMatrixService
     {
         private readonly HttpClient _httpClient;
+        private readonly IGeoCodingService _geoCodingService;
 
-        public DistanceMatrixService(HttpClient httpClient)
+        public DistanceMatrixService(HttpClient httpClient, IGeoCodingService geoCodingService)
         {
             _httpClient = httpClient;
+            _geoCodingService = geoCodingService;
         }
 
         public async Task<List<Location>> GetListLocation(List<string> addressList)
@@ -20,8 +22,7 @@ namespace ReadExcelProcess.Service
             List<Location> locations = new List<Location>();
             foreach (var add in addressList)
             {
-                Location location = new Location();
-                location.Address = add;
+                Location location = await _geoCodingService.GetCoordinatesAsync(add);
                 locations.Add(location);
             }
             return locations;
