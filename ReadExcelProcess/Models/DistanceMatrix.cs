@@ -1,4 +1,4 @@
-﻿namespace ReadExcelProcess.DTO
+﻿namespace ReadExcelProcess.Models
 {
     public class DistanceMatrix
     {
