@@ -26,7 +26,6 @@ namespace ReadExcelProcess.Service
             if (Path.GetExtension(file.FileName).ToLower() != ".xlsx")
                 throw new ArgumentException("Vui lòng tải lên file Excel (.xlsx).");
 
-            // 👉 Gọi AssignmentService để tải file lên
             _assignmentService.LoadAssignmentsFromExcel(file);
 
             using var stream = new MemoryStream();
@@ -65,9 +64,8 @@ namespace ReadExcelProcess.Service
                 travelTimes.Add(row);
             }
 
-             return (maintenanceTimes, travelTimes);
+            return (maintenanceTimes, travelTimes);
         }
-
 
         public async Task<byte[]> GetFile(IFormFile file)
         {
@@ -131,7 +129,6 @@ namespace ReadExcelProcess.Service
                         repairPerson.assignments.Add(assignment);
                     }
                 }
-
                 list.Add(repairPerson);
             }
 
@@ -153,26 +150,28 @@ namespace ReadExcelProcess.Service
 
                 worksheet.Cells[1, 1].Value = "Vị trí";
                 worksheet.Cells[1, 2].Value = "Thời gian sửa chữa";
-
                 int row = 2;
-                if (repairPerson.assignments != null)
+                decimal totalRepairTime = 0;
+                if (repairPerson.assignments != null && repairPerson.assignments.Count > 0)
                 {
                     foreach (var assignment in repairPerson.assignments)
                     {
                         worksheet.Cells[row, 1].Value = assignment.Location;
                         worksheet.Cells[row, 2].Value = assignment.RepairTime;
+                        totalRepairTime += assignment.RepairTime;
                         row++;
                     }
                 }
-                worksheet.Cells[row + 1, 1].Value = "Tổng thời gian làm việc";
-                worksheet.Cells[row + 1, 2].Value = repairPerson.TotalWorkTime;
 
-                // 👉 Định dạng cột để hỗ trợ Unicode tốt hơn
+                worksheet.Cells[row + 1, 1].Value = "Tổng thời gian di chuyển";
+                decimal totalTravelTime = repairPerson.TotalWorkTime - totalRepairTime;
+                worksheet.Cells[row + 1, 2].Value = totalTravelTime;
+                worksheet.Cells[row + 2, 1].Value = "Tổng thời gian làm việc";
+                worksheet.Cells[row + 2, 2].Value = repairPerson.TotalWorkTime;
+                
                 worksheet.Cells.AutoFitColumns();
             }
-
             return package.GetAsByteArray();
         }
-
     }
 }
