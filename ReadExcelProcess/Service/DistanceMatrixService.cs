@@ -18,16 +18,6 @@ namespace ReadExcelProcess.Service
             _geoCodingService = geoCodingService;
         }
 
-        public async Task<List<Location>> GetListLocation(List<string> addressList)
-        {
-            List<Location> locations = new List<Location>();
-            foreach (var add in addressList)
-            {
-                Location location = await _geoCodingService.GetCoordinatesAsync(add);
-                locations.Add(location);
-            }
-            return locations;
-        }
 
         public async Task<double[,]> GetTravelTimeMatrix(List<string> addressList)
         {
@@ -52,10 +42,24 @@ namespace ReadExcelProcess.Service
                         int destIndex = i + 1 + j;
                         matrix[i, destIndex] = matrix[destIndex, i] = travelTimes[j];
                     }
+                    await Task.Delay(500);
                 }
             }
 
             return matrix;
+        }
+
+        private async Task<List<Location>> GetListLocation(List<string> addressList)
+        {
+            List<Location> locations = new List<Location>();
+            foreach (var add in addressList)
+            {
+                Location location = await _geoCodingService.GetCoordinatesAsync(add);
+                locations.Add(location);
+
+                await Task.Delay(500);
+            }
+            return locations;
         }
 
         private async Task<List<double>> GetTravelTime(Location origin, List<Location> destinations)

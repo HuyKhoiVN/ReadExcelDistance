@@ -9,15 +9,24 @@ namespace ReadExcelProcess.Service
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IAssignmentService _assignmentService;
+        private readonly IDistanceMatrixService _distanceMatrixService;
 
         public ExcelService(
             IHttpClientFactory httpClientFactory,
-            IAssignmentService assignmentService)
+            IAssignmentService assignmentService,
+            IDistanceMatrixService distanceMatrixService)
         {
             _httpClientFactory = httpClientFactory;
             _assignmentService = assignmentService;
+            _distanceMatrixService = distanceMatrixService;
         }
 
+        /// <summary>
+        /// Lấy data excel trả về list thời gian sửa chữa và mảng 2 chiều thời gian di chuyển
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public (List<double> MaintenanceTimes, List<List<double>> TravelTimes) GetExcelData(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -66,6 +75,66 @@ namespace ReadExcelProcess.Service
             }
 
              return (maintenanceTimes, travelTimes);
+        }
+
+        private (List<string> Addresses, List<double> MaintenanceTimes) ExtractDataFromExcel(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("File không hợp lệ.");
+
+            if (Path.GetExtension(file.FileName).ToLower() != ".xlsx")
+                throw new ArgumentException("Vui lòng tải lên file Excel (.xlsx). ");
+
+            using var stream = new MemoryStream();
+            file.CopyTo(stream);
+            stream.Position = 0;
+
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            using var package = new ExcelPackage(stream);
+            var sheet = package.Workbook.Worksheets[0];
+            if (sheet == null)
+                throw new ArgumentException("Sheet is missing from the file.");
+
+            int rowCount = sheet.Dimension.Rows;
+            List<string> addresses = new();
+            List<double> maintenanceTimes = new();
+
+            for (int i = 1; i <= rowCount; i++)
+            {
+                string address = sheet.Cells[i, 1].GetValue<string>();
+                double time = sheet.Cells[i, 2].GetValue<double>();
+
+                addresses.Add(address);
+                maintenanceTimes.Add(Math.Round(time, 2));
+            }
+
+            return (addresses, maintenanceTimes);
+        }
+
+        public async Task<string> GenerateTravelTimeExcel(IFormFile file)
+        {
+            var (addressList, _) = ExtractDataFromExcel(file);
+
+            double[,] travelTimeMatrix = await _distanceMatrixService.GetTravelTimeMatrix(addressList);
+            string fileName = $"{Guid.NewGuid().ToString("N")}.xlsx";
+            string filePath = Path.Combine("wwwroot", fileName);
+
+            using var package = new ExcelPackage();
+            var sheet = package.Workbook.Worksheets.Add("TravelTimes");
+
+            int size = addressList.Count;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    sheet.Cells[i + 1, j + 1].Value = Math.Round(travelTimeMatrix[i, j], 4);
+                }
+            }
+
+            using var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write);
+            package.SaveAs(fileStream);
+
+            return fileName;
         }
 
 

@@ -47,6 +47,24 @@ namespace ReadExcelProcess.Controllers
                 );
         }
 
+        [HttpPost("api/generate-travel-time-matrix")]
+        public async Task<IActionResult> GenerateTravelTimeMatrix(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File không hợp lệ.");
+
+            // Gọi function để tạo file Excel mới chứa ma trận tọa độ
+            string generatedFileName = await _excelService.GenerateTravelTimeExcel(file);
+
+            string filePath = Path.Combine("wwwroot", generatedFileName);
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+
+            // Đặt tên file để AJAX có thể lấy
+            Response.Headers["X-File-Name"] = generatedFileName;
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", generatedFileName);
+        }
+
         [HttpPost("api/GetDistanceMatrix")]
         public async Task<IActionResult> GetDistanceMatrix([FromBody] List<string> addressList)
         {

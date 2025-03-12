@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.12.35527.113
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadExcel", "ReadExcel\ReadExcel.csproj", "{824B582E-DB18-42A4-A5B7-D14C91635FDC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadExcelProcess", "ReadExcelProcess\ReadExcelProcess.csproj", "{854B0842-86BD-4779-9CEB-413178E92DE1}"
 EndProject
 Global
@@ -13,10 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{824B582E-DB18-42A4-A5B7-D14C91635FDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{824B582E-DB18-42A4-A5B7-D14C91635FDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{824B582E-DB18-42A4-A5B7-D14C91635FDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{824B582E-DB18-42A4-A5B7-D14C91635FDC}.Release|Any CPU.Build.0 = Release|Any CPU
 		{854B0842-86BD-4779-9CEB-413178E92DE1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{854B0842-86BD-4779-9CEB-413178E92DE1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{854B0842-86BD-4779-9CEB-413178E92DE1}.Release|Any CPU.ActiveCfg = Release|Any CPU
