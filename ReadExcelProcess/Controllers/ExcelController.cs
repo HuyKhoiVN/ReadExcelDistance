@@ -22,6 +22,12 @@ namespace ReadExcelProcess.Controllers
             return View();
         }
 
+        [HttpGet("time")]
+        public IActionResult TimeWork()
+        {
+            return View();
+        }
+
         [HttpPost("api/data")]
         public IActionResult GetExcelData(IFormFile file)
         {
