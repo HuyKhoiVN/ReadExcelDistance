@@ -15,7 +15,7 @@ namespace ReadExcelProcess.Service
 
         public async Task<Location> GetCoordinatesAsync(string address)
         {
-            var requestUrl = $"{ReadExcelConstant.APIURL}/geocode?address={Uri.EscapeDataString(address)}&api_key={ReadExcelConstant.APIKEY}";
+            var requestUrl = $"{ReadExcelConstant.APIURL}geocode?address={Uri.EscapeDataString(address)}&api_key={ReadExcelConstant.APIKEY}";
             var response = await _httpClient.GetAsync(requestUrl);
             response.EnsureSuccessStatusCode();
 

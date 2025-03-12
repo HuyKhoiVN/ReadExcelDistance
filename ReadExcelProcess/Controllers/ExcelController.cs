@@ -10,13 +10,20 @@ namespace ReadExcelProcess.Controllers
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
 
-        public ExcelController(IExcelService excelService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService)
         {
+            _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
         }
 
         [HttpGet("home")]
         public IActionResult Index()
+        {
+            return View();
+        }
+
+        [HttpGet("time")]
+        public IActionResult TimeWork()
         {
             return View();
         }
@@ -46,8 +53,26 @@ namespace ReadExcelProcess.Controllers
                 );
         }
 
-        [HttpGet]
-        public async Task<IActionResult> GetDistanceMatrix([FromQuery] List<string> addressList)
+        [HttpPost("api/generate-travel-time-matrix")]
+        public async Task<IActionResult> GenerateTravelTimeMatrix(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File không hợp lệ.");
+
+            // Gọi function để tạo file Excel mới chứa ma trận tọa độ
+            string generatedFileName = await _excelService.GenerateTravelTimeExcel(file);
+
+            string filePath = Path.Combine("wwwroot", generatedFileName);
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(filePath);
+
+            // Đặt tên file để AJAX có thể lấy
+            Response.Headers["X-File-Name"] = generatedFileName;
+
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", generatedFileName);
+        }
+
+        [HttpPost("api/GetDistanceMatrix")]
+        public async Task<IActionResult> GetDistanceMatrix([FromBody] List<string> addressList)
         {
             if (addressList == null || addressList.Count < 2)
                 return BadRequest("Cần ít nhất 2 điểm để tính khoảng cách.");

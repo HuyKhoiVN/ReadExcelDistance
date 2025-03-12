@@ -17,10 +17,10 @@
     <div class="row d-flex align-items-center justify-content-center">
         <!-- Left Side: File Upload -->
         <div class="col-md-5 d-flex flex-column align-items-center">
-            <h2 class="text-center mb-4">Upload File</h2>
+            <h2 class="text-center mb-4">Tải File để tối ưu</h2>
             <form id="uploadForm" enctype="multipart/form-data" class="w-100">
                 <div class="mb-3">
-                    <label for="fileInput" class="form-label">Choose File</label>
+                    <label for="fileInput" class="form-label">Chọn File</label>
                     <input class="form-control" type="file" id="fileInput" name="file" required>
                 </div>
                 <div class="d-flex gap-1 w-100">
@@ -61,7 +61,7 @@
 
             formData.append("file", fileInput);
 
-            /* $.ajax({
+             $.ajax({
                 url: systemURL + "Excel/api/import", // Đảm bảo API đúng
                 type: "POST",
                 data: formData,
@@ -95,9 +95,9 @@
                 error: function (xhr, status, error) {
                     $("#fileInfo").html(`<p class='text-danger'>Error uploading file.</p>`);
                 }
-            }); */
+            });
 
-            $.ajax({
+            /* $.ajax({
                 url: systemURL + "Excel/api/generate-travel-time-matrix",
                 type: "POST",
                 data: formData,
@@ -124,7 +124,7 @@
                 error: function (xhr, status, error) {
                     $("#fileInfo").html(`<p class='text-danger'>Error uploading file.</p>`);
                 }
-            });
+            }); */
 
         });
     });
