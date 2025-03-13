@@ -1,0 +1,128 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+
+namespace ReadExcelProcess.Model
+{
+    public partial class SysDbContext : DbContext
+    {
+
+        public SysDbContext(DbContextOptions<SysDbContext> options)
+            : base(options)
+        {
+        }
+
+        public virtual DbSet<Device> Devices { get; set; } = null!;
+        public virtual DbSet<DeviceMaintenanceSchedule> DeviceMaintenanceSchedules { get; set; } = null!;
+        public virtual DbSet<DeviceTravelTime> DeviceTravelTimes { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<Device>(entity =>
+            {
+                entity.ToTable("Device");
+
+                entity.Property(e => e.Address).HasMaxLength(200);
+
+                entity.Property(e => e.Area).HasMaxLength(100);
+
+                entity.Property(e => e.ContractNumber).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.Customer).HasMaxLength(100);
+
+                entity.Property(e => e.DeviceStatus).HasMaxLength(50);
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
+
+                entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
+
+                entity.Property(e => e.MaintenanceCycle).HasMaxLength(50);
+
+                entity.Property(e => e.ManagementBranch).HasMaxLength(100);
+
+                entity.Property(e => e.Manufacturer).HasMaxLength(100);
+
+                entity.Property(e => e.Model).HasMaxLength(100);
+
+                entity.Property(e => e.Province).HasMaxLength(100);
+
+                entity.Property(e => e.SerialNumber).HasMaxLength(50);
+
+                entity.Property(e => e.SubContractNumber).HasMaxLength(100);
+
+                entity.Property(e => e.Type).HasMaxLength(50);
+
+                entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<DeviceMaintenanceSchedule>(entity =>
+            {
+                entity.ToTable("DeviceMaintenanceSchedule");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.CreatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.DeviceId).HasColumnName("device_id");
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.MaintenanceEndDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("maintenance_end_date");
+
+                entity.Property(e => e.MaintenanceStartDate)
+                    .HasColumnType("datetime")
+                    .HasColumnName("maintenance_start_date");
+
+                entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<DeviceTravelTime>(entity =>
+            {
+                entity.ToTable("DeviceTravelTime");
+
+                entity.Property(e => e.CreatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.TravelTime).HasColumnType("decimal(10, 4)");
+
+                entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            OnModelCreatingPartial(modelBuilder);
+        }
+
+        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+    }
+}
