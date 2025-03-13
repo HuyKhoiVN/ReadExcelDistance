@@ -2,6 +2,7 @@
 using ReadExcelProcess.Constant;
 using ReadExcelProcess.DTO;
 using ReadExcelProcess.Models;
+using System.Globalization;
 using System.Text.Json;
 
 namespace ReadExcelProcess.Service
@@ -17,16 +18,6 @@ namespace ReadExcelProcess.Service
             _geoCodingService = geoCodingService;
         }
 
-        public async Task<List<Location>> GetListLocation(List<string> addressList)
-        {
-            List<Location> locations = new List<Location>();
-            foreach (var add in addressList)
-            {
-                Location location = await _geoCodingService.GetCoordinatesAsync(add);
-                locations.Add(location);
-            }
-            return locations;
-        }
 
         public async Task<double[,]> GetTravelTimeMatrix(List<string> addressList)
         {
@@ -51,25 +42,45 @@ namespace ReadExcelProcess.Service
                         int destIndex = i + 1 + j;
                         matrix[i, destIndex] = matrix[destIndex, i] = travelTimes[j];
                     }
+                    await Task.Delay(500);
                 }
             }
 
             return matrix;
         }
 
+        private async Task<List<Location>> GetListLocation(List<string> addressList)
+        {
+            List<Location> locations = new List<Location>();
+            foreach (var add in addressList)
+            {
+                Location location = await _geoCodingService.GetCoordinatesAsync(add);
+                locations.Add(location);
+
+                await Task.Delay(500);
+            }
+            return locations;
+        }
+
         private async Task<List<double>> GetTravelTime(Location origin, List<Location> destinations)
         {
-            string originParam = $"{origin.Latitude},{origin.Longitude}";
-            string destinationsParam = string.Join("%7C", destinations.Select(d => $"{d.Latitude},{d.Longitude}"));
+            string originParam = $"{origin.Latitude.ToString(CultureInfo.InvariantCulture)},{origin.Longitude.ToString(CultureInfo.InvariantCulture)}";
+            string destinationsParam = string.Join("|", destinations.Select(d => $"{d.Latitude.ToString(CultureInfo.InvariantCulture)},{d.Longitude.ToString(CultureInfo.InvariantCulture)}"));
 
-            string url = $"{ReadExcelConstant.APIURL}?origins={originParam}&destinations={destinationsParam}&vehicle=car&api_key={ReadExcelConstant.APIKEY}";
+            string url = $"{ReadExcelConstant.APIURL}distancematrix?origins={originParam}&destinations={destinationsParam}&vehicle=car&api_key={ReadExcelConstant.APIKEY}";
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
                 return new List<double>(new double[destinations.Count]);
 
             string json = await response.Content.ReadAsStringAsync();
-            var result = JsonSerializer.Deserialize<DistanceMatrixResponse>(json);
+            // map obj
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var result = JsonSerializer.Deserialize<DistanceMatrixResponse>(json, options);
+
 
             List<double> travelTimes = new();
             if (result?.Rows?.Count > 0)
