@@ -9,11 +9,13 @@ namespace ReadExcelProcess.Controllers
     {
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
+        private readonly IDeviceImportService _deviceImportService;
 
-        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
+            _deviceImportService = deviceImportService;
         }
 
         [HttpGet("home")]
@@ -82,6 +84,13 @@ namespace ReadExcelProcess.Controllers
             // Chuyển mảng 2D sang danh sách List<List<double>>
             var result = ConvertMatrixToList(matrix);
 
+            return Ok(result);
+        }
+
+        [HttpPost("api/import-devices")]
+        public async Task<IActionResult> ImportDevicesFromExcel(IFormFile file)
+        {
+            var result = await _deviceImportService.ImportDevicesFromExcel(file);
             return Ok(result);
         }
 

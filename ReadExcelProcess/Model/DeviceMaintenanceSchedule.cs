@@ -15,5 +15,6 @@ namespace ReadExcelProcess.Model
         public DateTime CreatedDate { get; set; }
         public string? UpdatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public int MaintenanceTimes { get; set; }
     }
 }

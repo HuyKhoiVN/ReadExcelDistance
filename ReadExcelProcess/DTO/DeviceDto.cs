@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace ReadExcelProcess.Model
+﻿namespace ReadExcelProcess.DTO
 {
-    public partial class Device
+    public class DeviceDto
     {
         public int Id { get; set; }
         public string SerialNumber { get; set; } = null!;
@@ -30,5 +27,6 @@ namespace ReadExcelProcess.Model
         public int TimeMaintenance { get; set; }
         public DateTime MaintenanceStartDate { get; set; }
         public DateTime MaintenanceEndDate { get; set; }
+        public int MaintainanceTimes { get; set; }
     }
 }

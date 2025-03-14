@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.DataProtection.KeyManagement;
+using Microsoft.EntityFrameworkCore;
+using ReadExcelProcess.Model;
 using ReadExcelProcess.Repositories;
 using ReadExcelProcess.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<SysDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllersWithViews();
 
@@ -11,6 +15,7 @@ builder.Services.AddTransient<IRepairPersonRepository, RepairPersonRepository>()
 builder.Services.AddTransient<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
+builder.Services.AddTransient<IDeviceImportService, DeviceImportService>();
 //builder.Services.AddTransient<IGeoCodingService, GeoCodingService>();
 builder.Services.AddHttpClient<GeoCodingService>();
 builder.Services.AddTransient<IGeoCodingService>(ge =>

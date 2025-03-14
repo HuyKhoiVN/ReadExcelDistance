@@ -35,9 +35,20 @@ namespace ReadExcelProcess.Service
                     var origin = locations[i];
                     var destinations = locations.Skip(i + 1).ToList();
 
-                    var travelTimes = await GetTravelTime(origin, destinations);
+                    var distanceMatrix = await GetTravelTime(origin, destinations);
 
-                    for(int j = 0; j < destinations.Count; j++)
+                    //var travelTimes = await GetTravelTime(origin, destinations);
+                    List<double> travelTimes = new();
+                    if (distanceMatrix?.Rows?.Count > 0)
+                    {
+                        foreach (var element in distanceMatrix.Rows[0].Elements)
+                        {
+                            double durationInHours = element.Status == "OK" ? element.Duration.Value / 3600.0 : double.MaxValue;
+                            travelTimes.Add(durationInHours);
+                        }
+                    }
+
+                    for (int j = 0; j < destinations.Count; j++)
                     {
                         int destIndex = i + 1 + j;
                         matrix[i, destIndex] = matrix[destIndex, i] = travelTimes[j];
@@ -62,7 +73,7 @@ namespace ReadExcelProcess.Service
             return locations;
         }
 
-        private async Task<List<double>> GetTravelTime(Location origin, List<Location> destinations)
+        private async Task<DistanceMatrixResponse> GetTravelTime(Location origin, List<Location> destinations)
         {
             string originParam = $"{origin.Latitude.ToString(CultureInfo.InvariantCulture)},{origin.Longitude.ToString(CultureInfo.InvariantCulture)}";
             string destinationsParam = string.Join("|", destinations.Select(d => $"{d.Latitude.ToString(CultureInfo.InvariantCulture)},{d.Longitude.ToString(CultureInfo.InvariantCulture)}"));
@@ -71,7 +82,7 @@ namespace ReadExcelProcess.Service
 
             HttpResponseMessage response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
-                return new List<double>(new double[destinations.Count]);
+                return null;
 
             string json = await response.Content.ReadAsStringAsync();
             // map obj
@@ -82,17 +93,18 @@ namespace ReadExcelProcess.Service
             var result = JsonSerializer.Deserialize<DistanceMatrixResponse>(json, options);
 
 
-            List<double> travelTimes = new();
-            if (result?.Rows?.Count > 0)
-            {
-                foreach (var element in result.Rows[0].Elements)
-                {
-                    double durationInHours = element.Status == "OK" ? element.Duration.Value / 3600.0 : double.MaxValue;
-                    travelTimes.Add(durationInHours);
-                }
-            }
+            //List<double> travelTimes = new();
+            //if (result?.Rows?.Count > 0)
+            //{
+            //    foreach (var element in result.Rows[0].Elements)
+            //    {
+            //        double durationInHours = element.Status == "OK" ? element.Duration.Value / 3600.0 : double.MaxValue;
+            //        travelTimes.Add(durationInHours);
+            //    }
+            //}
 
-            return travelTimes;
+            //return travelTimes;
+            return result;
         }
     }
 }
