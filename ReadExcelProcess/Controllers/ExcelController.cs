@@ -90,10 +90,39 @@ namespace ReadExcelProcess.Controllers
         [HttpPost("api/import-devices")]
         public async Task<IActionResult> ImportDevicesFromExcel(IFormFile file)
         {
-            var result = await _deviceImportService.ImportDevicesFromExcel(file);
-            return Ok(result);
+            try
+            {
+                var result = await _deviceImportService.ImportDevicesFromExcel(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
         }
 
+        [HttpPost("api/import-devices-travel-time")]
+        public async Task<IActionResult> ImportDevicesTravelTime(IFormFile file)
+        {
+            try
+            {
+                await _deviceImportService.ImportTravelTimeDevice(file);
+                return Ok();
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         private List<List<double>> ConvertMatrixToList(double[,] matrix)
         {
             int rows = matrix.GetLength(0);

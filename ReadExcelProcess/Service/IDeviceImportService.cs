@@ -2,6 +2,7 @@
 {
     public interface IDeviceImportService
     {
-        Task<(int totalAdded, List<int> addedIds)> ImportDevicesFromExcel(IFormFile file);
+        Task<List<int>> ImportDevicesFromExcel(IFormFile file);
+        Task ImportTravelTimeDevice(IFormFile file);
     }
 }
