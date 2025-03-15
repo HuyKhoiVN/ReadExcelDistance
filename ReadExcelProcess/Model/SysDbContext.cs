@@ -49,6 +49,10 @@ namespace ReadExcelProcess.Model
 
                 entity.Property(e => e.MaintenanceCycle).HasMaxLength(50);
 
+                entity.Property(e => e.MaintenanceEndDate).HasColumnType("datetime");
+
+                entity.Property(e => e.MaintenanceStartDate).HasColumnType("datetime");
+
                 entity.Property(e => e.ManagementBranch).HasMaxLength(100);
 
                 entity.Property(e => e.Manufacturer).HasMaxLength(100);
@@ -60,6 +64,8 @@ namespace ReadExcelProcess.Model
                 entity.Property(e => e.SerialNumber).HasMaxLength(50);
 
                 entity.Property(e => e.SubContractNumber).HasMaxLength(100);
+
+                entity.Property(e => e.TimeMaintenance).HasDefaultValueSql("((2))");
 
                 entity.Property(e => e.Type).HasMaxLength(50);
 

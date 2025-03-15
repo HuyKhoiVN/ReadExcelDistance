@@ -9,11 +9,13 @@ namespace ReadExcelProcess.Controllers
     {
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
+        private readonly IDeviceImportService _deviceImportService;
 
-        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
+            _deviceImportService = deviceImportService;
         }
 
         [HttpGet("home")]
@@ -85,6 +87,42 @@ namespace ReadExcelProcess.Controllers
             return Ok(result);
         }
 
+        [HttpPost("api/import-devices")]
+        public async Task<IActionResult> ImportDevicesFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _deviceImportService.ImportDevicesFromExcel(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("api/import-devices-travel-time")]
+        public async Task<IActionResult> ImportDevicesTravelTime(IFormFile file)
+        {
+            try
+            {
+                await _deviceImportService.ImportTravelTimeDevice(file);
+                return Ok();
+            }catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
         private List<List<double>> ConvertMatrixToList(double[,] matrix)
         {
             int rows = matrix.GetLength(0);
