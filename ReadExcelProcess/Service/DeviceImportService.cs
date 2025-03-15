@@ -119,6 +119,34 @@ namespace ReadExcelProcess.Service
                             await _dbContext.Devices.AddAsync(device);
                         }
                         newDevices.Add(device);
+                        int frequencyMonths = 3; // Giá trị mặc định
+                        if (!string.IsNullOrWhiteSpace(device.MaintenanceCycle))
+                        {
+                            if (!int.TryParse(device.MaintenanceCycle, out frequencyMonths))
+                            {
+                                frequencyMonths = 3; // Nếu parse thất bại, dùng mặc định
+                            }
+                        }
+                        DateTime currentStart = device.MaintenanceStartDate;
+                        DateTime currentEnd = device.MaintenanceEndDate;
+                        DateTime limitDate = new DateTime(currentStart.Year, 12, 31);
+                        int maintenanceTimes = 1;
+                        while (currentStart <= limitDate)
+                        {
+                            var schedule = new DeviceMaintenanceSchedule
+                            {
+                                DeviceId = device.Id,
+                                MaintenanceStartDate = currentStart,
+                                MaintenanceEndDate = currentEnd,
+                                MaintenanceTimes = maintenanceTimes,
+                            };
+
+                            await _dbContext.DeviceMaintenanceSchedules.AddAsync(schedule);
+
+                            maintenanceTimes++;
+                            currentStart = currentStart.AddMonths(frequencyMonths);
+                            currentEnd = currentEnd.AddMonths(frequencyMonths);
+                        }
                     }
                     catch (Exception ex)
                     {
@@ -135,7 +163,6 @@ namespace ReadExcelProcess.Service
                 Console.WriteLine($"Lỗi import thiết bị: {ex.Message}");
                 throw;
             }
-
 
             return newDevices.Select(x => x.Id).ToList();
         }
