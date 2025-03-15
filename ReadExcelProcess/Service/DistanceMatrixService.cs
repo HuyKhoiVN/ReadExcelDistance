@@ -35,12 +35,33 @@ namespace ReadExcelProcess.Service
                     var origin = locations[i];
                     var destinations = locations.Skip(i + 1).ToList();
 
-                    var travelTimes = await GetTravelTime(origin, destinations);
-
-                    for(int j = 0; j < destinations.Count; j++)
+                    try
                     {
-                        int destIndex = i + 1 + j;
-                        matrix[i, destIndex] = matrix[destIndex, i] = travelTimes[j];
+                        var distanceMatrix = await GetTravelTime(origin, destinations);
+                        List<double> travelTimes = new();
+
+                        if (distanceMatrix?.Rows?.Count > 0)
+                        {
+                            foreach (var element in distanceMatrix.Rows[0].Elements)
+                            {
+                                double durationInHours = element.Status == "OK" ? element.Duration.Value / 3600.0 : double.MaxValue;
+                                travelTimes.Add(durationInHours);
+                            }
+                        }
+
+                        for (int j = 0; j < destinations.Count; j++)
+                        {
+                            int destIndex = i + 1 + j;
+                            matrix[i, destIndex] = matrix[destIndex, i] = travelTimes[j];
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Lỗi khi gọi API lấy thời gian từ {origin.Latitude},{origin.Longitude}: {ex.Message}");
+                        for (int j = i + 1; j < n; j++)
+                        {
+                            matrix[i, j] = matrix[j, i] = double.MaxValue;
+                        }
                     }
                     await Task.Delay(500);
                 }
@@ -54,7 +75,7 @@ namespace ReadExcelProcess.Service
             List<Location> locations = new List<Location>();
             foreach (var add in addressList)
             {
-                Location location = await _geoCodingService.GetCoordinatesAsync(add);
+                Location location = await _geoCodingService.GetCoordinatesAsync(add); // gọi tới api geoCoding để lấy được toạ độ
                 locations.Add(location);
 
                 await Task.Delay(500);
@@ -62,37 +83,30 @@ namespace ReadExcelProcess.Service
             return locations;
         }
 
-        private async Task<List<double>> GetTravelTime(Location origin, List<Location> destinations)
+        public async Task<DistanceMatrixResponse> GetTravelTime(Location origin, List<Location> destinations)
         {
-            string originParam = $"{origin.Latitude.ToString(CultureInfo.InvariantCulture)},{origin.Longitude.ToString(CultureInfo.InvariantCulture)}";
-            string destinationsParam = string.Join("|", destinations.Select(d => $"{d.Latitude.ToString(CultureInfo.InvariantCulture)},{d.Longitude.ToString(CultureInfo.InvariantCulture)}"));
-
-            string url = $"{ReadExcelConstant.APIURL}distancematrix?origins={originParam}&destinations={destinationsParam}&vehicle=car&api_key={ReadExcelConstant.APIKEY}";
-
-            HttpResponseMessage response = await _httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
-                return new List<double>(new double[destinations.Count]);
-
-            string json = await response.Content.ReadAsStringAsync();
-            // map obj
-            var options = new JsonSerializerOptions
+            try
             {
-                PropertyNameCaseInsensitive = true
-            };
-            var result = JsonSerializer.Deserialize<DistanceMatrixResponse>(json, options);
+                string originParam = $"{origin.Latitude.ToString(CultureInfo.InvariantCulture)},{origin.Longitude.ToString(CultureInfo.InvariantCulture)}";
+                string destinationsParam = string.Join("|", destinations.Select(d => $"{d.Latitude.ToString(CultureInfo.InvariantCulture)},{d.Longitude.ToString(CultureInfo.InvariantCulture)}"));
 
+                string url = $"{ReadExcelConstant.APIURL}distancematrix?origins={originParam}&destinations={destinationsParam}&vehicle=car&api_key={ReadExcelConstant.APIKEY}";
 
-            List<double> travelTimes = new();
-            if (result?.Rows?.Count > 0)
-            {
-                foreach (var element in result.Rows[0].Elements)
-                {
-                    double durationInHours = element.Status == "OK" ? element.Duration.Value / 3600.0 : double.MaxValue;
-                    travelTimes.Add(durationInHours);
-                }
+                HttpResponseMessage response = await _httpClient.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception($"API trả về lỗi: {response.StatusCode}");
+
+                string json = await response.Content.ReadAsStringAsync();
+                // map obj
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+
+                return JsonSerializer.Deserialize<DistanceMatrixResponse>(json, options);
             }
-
-            return travelTimes;
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Lỗi khi gọi API Goong: {ex.Message}");
+                return null;
+            }
         }
     }
 }
