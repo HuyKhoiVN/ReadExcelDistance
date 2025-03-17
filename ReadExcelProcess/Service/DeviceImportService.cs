@@ -10,12 +10,14 @@ namespace ReadExcelProcess.Service
         private readonly SysDbContext _dbContext;
         private readonly IGeoCodingService _geoCodingService;
         private readonly IDistanceMatrixService _distanceMatrixService;
+        private readonly ILogger<DeviceImportService> _logger;
 
-        public DeviceImportService(SysDbContext dbContext, IGeoCodingService geoCodingService, IDistanceMatrixService distanceMatrixService)
+        public DeviceImportService(SysDbContext dbContext, IGeoCodingService geoCodingService, IDistanceMatrixService distanceMatrixService, ILogger<DeviceImportService> logger)
         {
             _dbContext = dbContext;
             _geoCodingService = geoCodingService;
             _distanceMatrixService = distanceMatrixService;
+            _logger = logger;
         }
 
         public async Task<List<int>> ImportDevicesFromExcel(IFormFile file)
@@ -69,6 +71,7 @@ namespace ReadExcelProcess.Service
                         try
                         {
                             location = await _geoCodingService.GetCoordinatesAsync(address) ?? new Location { Latitude = 0, Longitude = 0 };
+                            await Task.Delay(250);
                         }
                         catch (Exception)
                         {
@@ -118,18 +121,25 @@ namespace ReadExcelProcess.Service
                         {
                             await _dbContext.Devices.AddAsync(device);
                         }
+
                         newDevices.Add(device);
-                        int frequencyMonths = 3; // Giá trị mặc định
+                        await Task.Delay(250);
+
+                        await _dbContext.SaveChangesAsync();
+
+                        int frequencyMonths = 3;
                         if (!string.IsNullOrWhiteSpace(device.MaintenanceCycle))
                         {
                             if (!int.TryParse(device.MaintenanceCycle, out frequencyMonths))
                             {
-                                frequencyMonths = 3; // Nếu parse thất bại, dùng mặc định
+                                frequencyMonths = 3;
                             }
                         }
+
                         DateTime currentStart = device.MaintenanceStartDate;
                         DateTime currentEnd = device.MaintenanceEndDate;
                         DateTime limitDate = new DateTime(currentStart.Year, 12, 31);
+
                         int maintenanceTimes = 1;
                         while (currentStart <= limitDate)
                         {
@@ -155,6 +165,70 @@ namespace ReadExcelProcess.Service
                     }
                 }
                 await _dbContext.SaveChangesAsync();
+
+                // GỌI HÀM REIMPORT NẾU CÒN THIẾU TOẠ ĐỘ
+                if (newDevices.Any(d => d.Latitude == 0 || d.Longitude == 0))
+                {
+                    _logger.LogInformation("Bắt đầu quá trình retry lấy tọa độ...");
+                    await ReImportDeviceCoordinate(newDevices);
+                }
+
+                _logger.LogInformation("Hoàn tất import và xử lý tọa độ!");
+
+                var devicesWithCoordinates = newDevices.Where(d => d.Latitude != 0 && d.Longitude != 0).ToList();
+                int n = devicesWithCoordinates.Count;
+                List<DeviceTravelTime> deviceTravels = new List<DeviceTravelTime>();
+
+                for (int i = 0; i < n; i++)
+                {
+                    var origin = devicesWithCoordinates[i];
+                    var destinations = devicesWithCoordinates.Skip(i + 1).ToList();
+
+                    var distanceMatrix = await _distanceMatrixService.GetTravelTime(
+                        new Location { Latitude = origin.Latitude ?? 0, Longitude = origin.Longitude ?? 0 },
+                        destinations.Select(d => new Location { Latitude = d.Latitude ?? 0, Longitude = d.Longitude ?? 0 }).ToList()
+                    );
+                    await Task.Delay(250);
+
+                    if (distanceMatrix?.Rows?.Count > 0)
+                    {
+                        for (int j = 0; j < destinations.Count; j++)
+                        {
+                            var destinationDevice = destinations[j];
+
+                            var durationInHours = distanceMatrix.Rows[0].Elements[j].Status == "OK"
+                                ? distanceMatrix.Rows[0].Elements[j].Duration.Value / 3600.0
+                                : double.MaxValue;
+
+                            var (id1, id2) = origin.Id < destinationDevice.Id
+                                            ? (origin.Id, destinationDevice.Id)
+                                            : (destinationDevice.Id, origin.Id);
+
+                            var isExistInDb = await _dbContext.DeviceTravelTimes.AnyAsync(dt => dt.DeviceId1 == id1 && dt.DeviceId2 == id2);
+
+                            if (!isExistInDb)
+                            {
+                                deviceTravels.Add(new DeviceTravelTime
+                                {
+                                    DeviceId1 = id1,
+                                    DeviceId2 = id2,
+                                    TravelTime = (decimal)durationInHours,
+                                    IsActive = true,
+                                    IsDeleted = false,
+                                    CreatedBy = "System",
+                                    CreatedDate = DateTime.UtcNow
+                                });
+                            }
+                        }
+                    }
+                }
+
+                if (deviceTravels.Count > 0)
+                {
+                    await _dbContext.DeviceTravelTimes.AddRangeAsync(deviceTravels);
+                    await _dbContext.SaveChangesAsync();
+                }
+
                 await transaction.CommitAsync();
             }
             catch (Exception ex)
@@ -167,108 +241,61 @@ namespace ReadExcelProcess.Service
             return newDevices.Select(x => x.Id).ToList();
         }
 
-        public async Task ImportTravelTimeDevice(IFormFile file)
+        /// <summary>
+        /// Re check if device coordinate is null or == 0
+        /// </summary>
+        /// <param name="devices">list device need to check</param>
+        /// <returns></returns>
+        private async Task ReImportDeviceCoordinate(List<Device> devices)
         {
-            if (file == null || file.Length == 0)
-                throw new ArgumentException("File không hợp lệ.");
+            int maxRetries = 3;
 
-            if (Path.GetExtension(file.FileName).ToLower() != ".xlsx")
-                throw new ArgumentException("Vui lòng tải lên file Excel (.xlsx).");
-
-            using var stream = new MemoryStream();
-            file.CopyTo(stream);
-            stream.Position = 0;
-
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
-            using var package = new ExcelPackage(stream);
-
-            var worksheet = package.Workbook.Worksheets[0];
-            if (worksheet == null)
-                throw new ArgumentException("Sheet1 is missing from the file.");
-
-            int rowCount = worksheet.Dimension.Rows;
-            var newDevices = new List<Device>();
-
-            var serialNumbers = worksheet.Cells[2, 9, rowCount, 9]
-                .Select(cell => cell.Text.Trim())
-                .Where(sn => !string.IsNullOrWhiteSpace(sn))
-                .Distinct()
-                .ToList();
-
-            // Lấy toàn bộ thiết bị đã tồn tại
-            var devices = await _dbContext.Devices
-                                .Where(d => serialNumbers.Contains(d.SerialNumber) && !d.IsDeleted)
-                                .ToListAsync();
-
-            var locations = devices.Select(d => new Location
+            for (int attempt = 1; attempt <= maxRetries; attempt++)
             {
-                Latitude = d.Latitude ?? 0,
-                Longitude = d.Longitude ?? 0
-            }).ToList();
+                var devicesNeedRetry = devices.Where(d => d.Latitude == 0 || d.Longitude == 0).ToList();
+                if (devicesNeedRetry.Count == 0) break; 
 
-            int n = locations.Count;
-            double[,] matrix = new double[n, n];
-            List<DeviceTravelTime> deviceTravels = new List<DeviceTravelTime>();
+                _logger.LogWarning($"Retry lần {attempt} - Thiết bị cần lấy lại tọa độ: {devicesNeedRetry.Count}");
 
-            for (int i = 0; i < n; i++)
-            {
-                matrix[i, i] = 0;
-
-                if (i < n - 1)
+                foreach (var device in devicesNeedRetry)
                 {
-                    var origin = locations[i];
-                    var destinations = locations.Skip(i + 1).ToList();
-
                     try
                     {
-                        var distanceMatrix = await _distanceMatrixService.GetTravelTime(origin, destinations);
-                        List<double> travelTimes = new();
-
-                        if (distanceMatrix?.Rows?.Count > 0)
+                        var updatedLocation = await _geoCodingService.GetCoordinatesAsync(device.Address);
+                        if (updatedLocation != null && updatedLocation.Latitude != 0 && updatedLocation.Longitude != 0)
                         {
-                            foreach (var element in distanceMatrix.Rows[0].Elements)
-                            {
-                                double durationInHours = element.Status == "OK" ? element.Duration.Value / 3600.0 : double.MaxValue;
-                                travelTimes.Add(durationInHours);
-                            }
+                            device.Latitude = updatedLocation.Latitude;
+                            device.Longitude = updatedLocation.Longitude;
+                            _logger.LogInformation($" Đã cập nhật tọa độ cho thiết bị {device.SerialNumber}");
+                        }
+                        else
+                        {
+                            _logger.LogWarning($" Không lấy được tọa độ mới cho thiết bị {device.SerialNumber}");
                         }
 
-                        for (int j = 0; j < destinations.Count; j++)
-                        {
-                            int destIndex = i + 1 + j;
-                            matrix[i, destIndex] = matrix[destIndex, i] = travelTimes[j];
-
-                            // Tạo DeviceTravelTime
-                            var travelTimeEntry = new DeviceTravelTime
-                            {
-                                DeviceId1 = devices[i].Id,
-                                DeviceId2 = devices[destIndex].Id,
-                                TravelTime = (decimal)travelTimes[j],
-                                IsActive = true,
-                                IsDeleted = false,
-                                CreatedBy = "System",
-                                CreatedDate = DateTime.UtcNow
-                            };
-                            deviceTravels.Add(travelTimeEntry);
-                        }
+                        // Delay tránh vượt giới hạn API
+                        await Task.Delay(250);
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Lỗi khi gọi API lấy thời gian từ {origin.Latitude},{origin.Longitude}: {ex.Message}");
-                        for (int j = i + 1; j < n; j++)
-                        {
-                            matrix[i, j] = matrix[j, i] = double.MaxValue;
-                        }
+                        _logger.LogError($"Lỗi khi retry lấy tọa độ cho thiết bị {device.SerialNumber}: {ex.Message}");
                     }
-                    await Task.Delay(500);
+                }
+
+                // Lưu DB sau mỗi lần retry
+                await _dbContext.SaveChangesAsync();
+
+                if (devicesNeedRetry.Count == 0)
+                {
+                    _logger.LogInformation("Tất cả thiết bị đã cập nhật đủ tọa độ!");
+                    break;
                 }
             }
 
-            // Thêm vào DB
-            if (deviceTravels.Count > 0)
+            // Nếu retry 3 lần vẫn còn thiết bị lỗi
+            if (devices.Any(d => d.Latitude == 0 || d.Longitude == 0))
             {
-                await _dbContext.DeviceTravelTimes.AddRangeAsync(deviceTravels);
-                await _dbContext.SaveChangesAsync();
+                _logger.LogError("Sau 3 lần retry, vẫn còn thiết bị chưa lấy được tọa độ!");
             }
         }
 
