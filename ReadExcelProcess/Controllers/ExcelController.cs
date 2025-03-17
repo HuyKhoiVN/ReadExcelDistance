@@ -111,18 +111,6 @@ namespace ReadExcelProcess.Controllers
             }
         }
 
-        [HttpPost("api/import-devices-travel-time")]
-        public async Task<IActionResult> ImportDevicesTravelTime(IFormFile file)
-        {
-            try
-            {
-                await _deviceImportService.ImportTravelTimeDevice(file);
-                return Ok();
-            }catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
         private List<List<double>> ConvertMatrixToList(double[,] matrix)
         {
             int rows = matrix.GetLength(0);

@@ -5,6 +5,10 @@ using ReadExcelProcess.Repositories;
 using ReadExcelProcess.Service;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(); 
+builder.Logging.AddDebug();
+
 builder.Services.AddDbContext<SysDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
