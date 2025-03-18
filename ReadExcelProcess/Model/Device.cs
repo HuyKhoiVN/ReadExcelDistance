@@ -6,29 +6,28 @@ namespace ReadExcelProcess.Model
     public partial class Device
     {
         public int Id { get; set; }
+        public string Name { get; set; } = null!;
+        public string Class { get; set; } = null!;
+        public string Family { get; set; } = null!;
         public string SerialNumber { get; set; } = null!;
-        public string Customer { get; set; } = null!;
-        public string? ContractNumber { get; set; }
-        public string? SubContractNumber { get; set; }
-        public string ManagementBranch { get; set; } = null!;
+        public string Contact { get; set; } = null!;
+        public string DeviceIdNumber { get; set; } = null!;
         public string Address { get; set; } = null!;
         public string Province { get; set; } = null!;
         public string Area { get; set; } = null!;
-        public string Model { get; set; } = null!;
-        public string Type { get; set; } = null!;
-        public string Manufacturer { get; set; } = null!;
+        public string Zone { get; set; } = null!;
+        public string? Support1 { get; set; }
+        public string? Support2 { get; set; }
         public string DeviceStatus { get; set; } = null!;
-        public string MaintenanceCycle { get; set; } = null!;
+        public DateTime? LastChange { get; set; }
+        public string? ContractNumber { get; set; }
         public decimal? Longitude { get; set; }
         public decimal? Latitude { get; set; }
         public bool? IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public string? CreatedBy { get; set; }
+        public string CreatedBy { get; set; } = null!;
         public DateTime CreatedDate { get; set; }
         public string? UpdatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
-        public int TimeMaintenance { get; set; }
-        public DateTime MaintenanceStartDate { get; set; }
-        public DateTime MaintenanceEndDate { get; set; }
     }
 }

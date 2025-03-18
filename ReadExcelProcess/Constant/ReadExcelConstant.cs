@@ -3,6 +3,6 @@
     public static class ReadExcelConstant
     {
         public static string APIURL = "https://rsapi.goong.io/";
-        public static string APIKEY = "fc2yGTFIwfOrgkr82UW1cB8gaiME3PYJQKhHUXcO";
+        public static string APIKEY = "NJaaV5wGIJCT5BysLeydt3IhwycWhX9ZD7edG3uf";
     }
 }
