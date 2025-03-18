@@ -16,6 +16,8 @@ namespace ReadExcelProcess.Model
         public virtual DbSet<Device> Devices { get; set; } = null!;
         public virtual DbSet<DeviceMaintenanceSchedule> DeviceMaintenanceSchedules { get; set; } = null!;
         public virtual DbSet<DeviceTravelTime> DeviceTravelTimes { get; set; } = null!;
+        public virtual DbSet<Officer> Officers { get; set; } = null!;
+        public virtual DbSet<Province> Provinces { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -124,6 +126,42 @@ namespace ReadExcelProcess.Model
                 entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<Officer>(entity =>
+            {
+                entity.ToTable("Officer");
+
+                entity.Property(e => e.Account).HasMaxLength(50);
+
+                entity.Property(e => e.Branch).HasMaxLength(100);
+
+                entity.Property(e => e.Cccd)
+                    .HasMaxLength(50)
+                    .HasColumnName("CCCD");
+
+                entity.Property(e => e.DateOfIssue).HasColumnType("date");
+
+                entity.Property(e => e.FullName).HasMaxLength(100);
+
+                entity.Property(e => e.PlaceOfIssue).HasMaxLength(100);
+
+                entity.Property(e => e.Region).HasMaxLength(100);
+
+                entity.Property(e => e.Title).HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Province>(entity =>
+            {
+                entity.ToTable("Province");
+
+                entity.Property(e => e.Address).HasMaxLength(255);
+
+                entity.Property(e => e.Fax).HasMaxLength(20);
+
+                entity.Property(e => e.Phone).HasMaxLength(20);
+
+                entity.Property(e => e.ProvinceName).HasMaxLength(100);
             });
 
             OnModelCreatingPartial(modelBuilder);
