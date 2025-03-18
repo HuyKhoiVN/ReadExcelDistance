@@ -9,14 +9,16 @@ namespace ReadExcelProcess.Controllers
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
         private readonly IDeviceImportService _deviceImportService;
+        private readonly IProvinceService _provinceService;
         private readonly IOfficerImportService _officerImportService;
 
-        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService,
-            IDeviceImportService deviceImportService, IOfficerImportService officerImportService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService,
+            IProvinceService provinceService, IOfficerImportService officerImportService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
             _deviceImportService = deviceImportService;
+            _provinceService = provinceService;
             _officerImportService = officerImportService;
         }
 
@@ -119,6 +121,30 @@ namespace ReadExcelProcess.Controllers
             try
             {
                 var result = await _officerImportService.ImportOfficerFromExcel(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("api/import-provinces")]
+        public async Task<IActionResult> ImportProvinceFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _provinceService.ImportProvincesFromExcelAsync(file);
 
                 return Ok(new
                 {

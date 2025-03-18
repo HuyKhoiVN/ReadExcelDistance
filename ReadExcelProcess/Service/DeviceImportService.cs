@@ -175,54 +175,76 @@ namespace ReadExcelProcess.Service
 
                 _logger.LogInformation("Hoàn tất import và xử lý tọa độ!");
 
-                var devicesWithCoordinates = newDevices.Where(d => d.Latitude != 0 && d.Longitude != 0).ToList();
-                int n = devicesWithCoordinates.Count;
-                List<DeviceTravelTime> deviceTravels = new List<DeviceTravelTime>();
+                // Lấy tất cả thiết bị có tọa độ từ DB (bao gồm cả thiết bị mới)
+                var devicesWithCoordinates = await _dbContext.Devices
+                    .Where(d => d.Latitude != 0 && d.Longitude != 0 && !d.IsDeleted)
+                    .ToListAsync();
 
-                for (int i = 0; i < n; i++)
+                var deviceTravels = new List<DeviceTravelTime>();
+
+                // Nhóm thiết bị theo tỉnh (không phân biệt hoa thường)
+                var devicesByProvince = devicesWithCoordinates
+                    .GroupBy(d => d.Province.ToLower().Trim())
+                    .ToList();
+
+                foreach (var provinceGroup in devicesByProvince)
                 {
-                    var origin = devicesWithCoordinates[i];
-                    var destinations = devicesWithCoordinates.Skip(i + 1).ToList();
+                    var devicesInProvince = provinceGroup.ToList();
+                    int n = devicesInProvince.Count;
+                    if (n < 2) continue;
 
-                    var distanceMatrix = await _distanceMatrixService.GetTravelTime(
-                        new Location { Latitude = origin.Latitude ?? 0, Longitude = origin.Longitude ?? 0 },
-                        destinations.Select(d => new Location { Latitude = d.Latitude ?? 0, Longitude = d.Longitude ?? 0 }).ToList()
-                    );
-                    await Task.Delay(250);
-
-                    if (distanceMatrix?.Rows?.Count > 0)
+                    // Chỉ tính thời gian di chuyển giữa các thiết bị trong cùng tỉnh
+                    for (int i = 0; i < n; i++)
                     {
-                        for (int j = 0; j < destinations.Count; j++)
+                        var origin = devicesInProvince[i];
+                        var destinations = devicesInProvince.Skip(i + 1).ToList();
+
+                        // Gọi API lấy thời gian di chuyển từ thiết bị "origin" tới tất cả thiết bị còn lại trong cùng tỉnh
+                        var distanceMatrix = await _distanceMatrixService.GetTravelTime(
+                            new Location { Latitude = origin.Latitude ?? 0, Longitude = origin.Longitude ?? 0 },
+                            destinations.Select(d => new Location { Latitude = d.Latitude ?? 0, Longitude = d.Longitude ?? 0 }).ToList()
+                        );
+
+                        await Task.Delay(250); // Delay tránh vượt giới hạn API
+
+                        if (distanceMatrix?.Rows?.Count > 0)
                         {
-                            var destinationDevice = destinations[j];
-
-                            var durationInHours = distanceMatrix.Rows[0].Elements[j].Status == "OK"
-                                ? distanceMatrix.Rows[0].Elements[j].Duration.Value / 3600.0
-                                : double.MaxValue;
-
-                            var (id1, id2) = origin.Id < destinationDevice.Id
-                                            ? (origin.Id, destinationDevice.Id)
-                                            : (destinationDevice.Id, origin.Id);
-
-                            var isExistInDb = await _dbContext.DeviceTravelTimes.AnyAsync(dt => dt.DeviceId1 == id1 && dt.DeviceId2 == id2);
-
-                            if (!isExistInDb)
+                            for (int j = 0; j < destinations.Count; j++)
                             {
-                                deviceTravels.Add(new DeviceTravelTime
+                                var destinationDevice = destinations[j];
+
+                                var durationInHours = distanceMatrix.Rows[0].Elements[j].Status == "OK"
+                                    ? distanceMatrix.Rows[0].Elements[j].Duration.Value / 3600.0
+                                    : double.MaxValue;
+
+                                // Sắp xếp id để tránh trùng lặp cặp (id1, id2) và (id2, id1)
+                                var (id1, id2) = origin.Id < destinationDevice.Id
+                                                ? (origin.Id, destinationDevice.Id)
+                                                : (destinationDevice.Id, origin.Id);
+
+                                // Kiểm tra xem cặp này đã tồn tại trong DB chưa
+                                var isExistInDb = await _dbContext.DeviceTravelTimes
+                                    .AnyAsync(dt => dt.DeviceId1 == id1 && dt.DeviceId2 == id2);
+
+                                if (!isExistInDb)
                                 {
-                                    DeviceId1 = id1,
-                                    DeviceId2 = id2,
-                                    TravelTime = (decimal)durationInHours,
-                                    IsActive = true,
-                                    IsDeleted = false,
-                                    CreatedBy = "System",
-                                    CreatedDate = DateTime.UtcNow
-                                });
+                                    deviceTravels.Add(new DeviceTravelTime
+                                    {
+                                        DeviceId1 = id1,
+                                        DeviceId2 = id2,
+                                        TravelTime = (decimal)durationInHours,
+                                        IsActive = true,
+                                        IsDeleted = false,
+                                        CreatedBy = "System",
+                                        CreatedDate = DateTime.UtcNow
+                                    });
+                                }
                             }
                         }
                     }
                 }
 
+                // Lưu dữ liệu nếu có chuyến đi mới
                 if (deviceTravels.Count > 0)
                 {
                     await _dbContext.DeviceTravelTimes.AddRangeAsync(deviceTravels);
@@ -230,6 +252,7 @@ namespace ReadExcelProcess.Service
                 }
 
                 await transaction.CommitAsync();
+
             }
             catch (Exception ex)
             {
