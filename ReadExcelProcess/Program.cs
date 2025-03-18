@@ -20,7 +20,7 @@ builder.Services.AddTransient<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
 builder.Services.AddTransient<IDeviceImportService, DeviceImportService>();
-//builder.Services.AddTransient<IGeoCodingService, GeoCodingService>();
+builder.Services.AddTransient<IOfficerImportService, OfficerImportService>();
 builder.Services.AddHttpClient<GeoCodingService>();
 builder.Services.AddTransient<IGeoCodingService>(ge =>
 {

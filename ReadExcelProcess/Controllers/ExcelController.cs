@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using ReadExcelProcess.Models;
 using ReadExcelProcess.Service;
 
 namespace ReadExcelProcess.Controllers
@@ -10,12 +9,15 @@ namespace ReadExcelProcess.Controllers
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
         private readonly IDeviceImportService _deviceImportService;
+        private readonly IOfficerImportService _officerImportService;
 
-        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService,
+            IDeviceImportService deviceImportService, IOfficerImportService officerImportService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
             _deviceImportService = deviceImportService;
+            _officerImportService = officerImportService;
         }
 
         [HttpGet("home")]
@@ -93,6 +95,30 @@ namespace ReadExcelProcess.Controllers
             try
             {
                 var result = await _deviceImportService.ImportDevicesFromExcel(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("api/import-officer")]
+        public async Task<IActionResult> ImportOfficerFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _officerImportService.ImportOfficerFromExcel(file);
 
                 return Ok(new
                 {
