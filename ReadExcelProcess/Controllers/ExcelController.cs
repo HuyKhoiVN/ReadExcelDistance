@@ -10,12 +10,15 @@ namespace ReadExcelProcess.Controllers
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
         private readonly IDeviceImportService _deviceImportService;
+        private readonly IProvinceService _provinceService;
 
-        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService,
+            IProvinceService provinceService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
             _deviceImportService = deviceImportService;
+            _provinceService = provinceService;
         }
 
         [HttpGet("home")]
@@ -93,6 +96,30 @@ namespace ReadExcelProcess.Controllers
             try
             {
                 var result = await _deviceImportService.ImportDevicesFromExcel(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("api/import-provinces")]
+        public async Task<IActionResult> ImportProvinceFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _provinceService.ImportProvincesFromExcelAsync(file);
 
                 return Ok(new
                 {

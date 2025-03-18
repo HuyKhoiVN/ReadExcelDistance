@@ -315,7 +315,7 @@ namespace ReadExcelProcess.Service
                 !int.TryParse(parts[2], out int year))
             {
                 throw new ArgumentException($"Ngày không hợp lệ tại dòng {row}:: {dateText}");
-            }
+            }z
 
             try
             {

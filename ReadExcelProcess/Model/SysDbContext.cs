@@ -7,7 +7,6 @@ namespace ReadExcelProcess.Model
 {
     public partial class SysDbContext : DbContext
     {
-
         public SysDbContext(DbContextOptions<SysDbContext> options)
             : base(options)
         {
@@ -18,6 +17,7 @@ namespace ReadExcelProcess.Model
         public virtual DbSet<DeviceTravelTime> DeviceTravelTimes { get; set; } = null!;
         public virtual DbSet<Officer> Officers { get; set; } = null!;
         public virtual DbSet<Province> Provinces { get; set; } = null!;
+        public virtual DbSet<ProvinceTravelTime> ProvinceTravelTimes { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -155,13 +155,54 @@ namespace ReadExcelProcess.Model
             {
                 entity.ToTable("Province");
 
-                entity.Property(e => e.Address).HasMaxLength(255);
+                entity.HasIndex(e => e.ProvinceName, "IX_Province_ProvinceName");
+
+                entity.Property(e => e.CreatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
 
                 entity.Property(e => e.Fax).HasMaxLength(20);
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
+
+                entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
 
                 entity.Property(e => e.Phone).HasMaxLength(20);
 
                 entity.Property(e => e.ProvinceName).HasMaxLength(100);
+
+                entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+            });
+
+            modelBuilder.Entity<ProvinceTravelTime>(entity =>
+            {
+                entity.ToTable("ProvinceTravelTime");
+
+                entity.HasIndex(e => new { e.ProvinceId, e.DeviceId }, "IX_ProvinceTravelTime_ProvinceDevice");
+
+                entity.Property(e => e.CreatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedDate)
+                    .HasColumnType("datetime")
+                    .HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.IsActive)
+                    .IsRequired()
+                    .HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.TravelTime).HasColumnType("decimal(10, 4)");
+
+                entity.Property(e => e.UpdatedBy).HasMaxLength(100);
+
+                entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
             });
 
             OnModelCreatingPartial(modelBuilder);
