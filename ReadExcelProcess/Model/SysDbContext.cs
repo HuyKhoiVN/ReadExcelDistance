@@ -7,11 +7,13 @@ namespace ReadExcelProcess.Model
 {
     public partial class SysDbContext : DbContext
     {
+
         public SysDbContext(DbContextOptions<SysDbContext> options)
             : base(options)
         {
         }
 
+        public virtual DbSet<Contract> Contracts { get; set; } = null!;
         public virtual DbSet<Device> Devices { get; set; } = null!;
         public virtual DbSet<DeviceMaintenanceSchedule> DeviceMaintenanceSchedules { get; set; } = null!;
         public virtual DbSet<DeviceTravelTime> DeviceTravelTimes { get; set; } = null!;
@@ -21,6 +23,33 @@ namespace ReadExcelProcess.Model
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Contract>(entity =>
+            {
+                entity.ToTable("Contract");
+
+                entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ContractNumberChildren)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.ContractNumberParent)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CustomerName)
+                    .HasMaxLength(255)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.EndDate)
+                    .HasColumnType("date")
+                    .HasColumnName("end_date");
+
+                entity.Property(e => e.StartDate)
+                    .HasColumnType("date")
+                    .HasColumnName("start_date");
+            });
+
             modelBuilder.Entity<Device>(entity =>
             {
                 entity.ToTable("Device");
@@ -28,6 +57,12 @@ namespace ReadExcelProcess.Model
                 entity.Property(e => e.Address).HasMaxLength(200);
 
                 entity.Property(e => e.Area).HasMaxLength(100);
+
+                entity.Property(e => e.Class).HasMaxLength(100);
+
+                entity.Property(e => e.Contact)
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.ContractNumber).HasMaxLength(100);
 
@@ -37,43 +72,47 @@ namespace ReadExcelProcess.Model
                     .HasColumnType("datetime")
                     .HasDefaultValueSql("(getdate())");
 
-                entity.Property(e => e.Customer).HasMaxLength(100);
+                entity.Property(e => e.DeviceIdNumber)
+                    .HasMaxLength(8)
+                    .IsUnicode(false)
+                    .IsFixedLength();
 
                 entity.Property(e => e.DeviceStatus).HasMaxLength(50);
+
+                entity.Property(e => e.Family)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.IsActive)
                     .IsRequired()
                     .HasDefaultValueSql("((1))");
 
+                entity.Property(e => e.LastChange).HasColumnType("datetime");
+
                 entity.Property(e => e.Latitude).HasColumnType("decimal(9, 6)");
 
                 entity.Property(e => e.Longitude).HasColumnType("decimal(9, 6)");
 
-                entity.Property(e => e.MaintenanceCycle).HasMaxLength(50);
-
-                entity.Property(e => e.MaintenanceEndDate).HasColumnType("datetime");
-
-                entity.Property(e => e.MaintenanceStartDate).HasColumnType("datetime");
-
-                entity.Property(e => e.ManagementBranch).HasMaxLength(100);
-
-                entity.Property(e => e.Manufacturer).HasMaxLength(100);
-
-                entity.Property(e => e.Model).HasMaxLength(100);
+                entity.Property(e => e.Name)
+                    .HasMaxLength(200)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Province).HasMaxLength(100);
 
                 entity.Property(e => e.SerialNumber).HasMaxLength(50);
 
-                entity.Property(e => e.SubContractNumber).HasMaxLength(100);
+                entity.Property(e => e.Support1).HasMaxLength(255);
 
-                entity.Property(e => e.TimeMaintenance).HasDefaultValueSql("((2))");
-
-                entity.Property(e => e.Type).HasMaxLength(50);
+                entity.Property(e => e.Support2).HasMaxLength(255);
 
                 entity.Property(e => e.UpdatedBy).HasMaxLength(100);
 
                 entity.Property(e => e.UpdatedDate).HasColumnType("datetime");
+
+                entity.Property(e => e.Zone)
+                    .HasMaxLength(5)
+                    .IsUnicode(false)
+                    .IsFixedLength();
             });
 
             modelBuilder.Entity<DeviceMaintenanceSchedule>(entity =>
