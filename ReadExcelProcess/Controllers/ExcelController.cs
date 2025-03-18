@@ -8,18 +8,20 @@ namespace ReadExcelProcess.Controllers
     {
         private readonly IExcelService _excelService;
         private readonly IDistanceMatrixService _distanceMatrixService;
-        private readonly IDeviceImportService _deviceImportService;
+        //private readonly IDeviceImportService _deviceImportService;
         private readonly IProvinceService _provinceService;
         private readonly IOfficerImportService _officerImportService;
+        private readonly IContractImportService _contractImportService;
 
-        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService,
-            IProvinceService provinceService, IOfficerImportService officerImportService)
+        public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, /*IDeviceImportService deviceImportService,*/
+            IProvinceService provinceService, IOfficerImportService officerImportService, IContractImportService contractImportService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
-            _deviceImportService = deviceImportService;
+            //_deviceImportService = deviceImportService;
             _provinceService = provinceService;
             _officerImportService = officerImportService;
+            _contractImportService = contractImportService;
         }
 
         [HttpGet("home")]
@@ -145,6 +147,30 @@ namespace ReadExcelProcess.Controllers
             try
             {
                 var result = await _provinceService.ImportProvincesFromExcelAsync(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("api/import-contracts")]
+        public async Task<IActionResult> ImportContractFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _contractImportService.ImportContractsAsync(file);
 
                 return Ok(new
                 {
