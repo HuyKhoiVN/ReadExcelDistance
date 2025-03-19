@@ -11,15 +11,19 @@ namespace ReadExcelProcess.Controllers
         private readonly IDeviceImportService _deviceImportService;
         private readonly IProvinceService _provinceService;
         private readonly IOfficerImportService _officerImportService;
+        private readonly IContractImportService _contractImportService;
+        private readonly IDeviceMaintenanceService _deviceMaintenanceService;
 
         public ExcelController(IExcelService excelService, IDistanceMatrixService distanceMatrixService, IDeviceImportService deviceImportService,
-            IProvinceService provinceService, IOfficerImportService officerImportService)
+            IProvinceService provinceService, IOfficerImportService officerImportService, IContractImportService contractImportService, IDeviceMaintenanceService deviceMaintenanceService)
         {
             _distanceMatrixService = distanceMatrixService;
             _excelService = excelService;
             _deviceImportService = deviceImportService;
             _provinceService = provinceService;
             _officerImportService = officerImportService;
+            _contractImportService = contractImportService;
+            _deviceMaintenanceService = deviceMaintenanceService;
         }
 
         [HttpGet("home")]
@@ -184,6 +188,44 @@ namespace ReadExcelProcess.Controllers
                     Status = "Error",
                     Message = ex.Message
                 });
+            }
+        }
+
+        [HttpPost("api/import-contracts")]
+        public async Task<IActionResult> ImportContractFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _contractImportService.ImportContractsAsync(file);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("generate-date")]
+        public async Task<IActionResult> GenerateMaintenanceSchedules()
+        {
+            try
+            {
+                await _deviceMaintenanceService.GenerateMaintenanceSchedulesAsync();
+                return Ok("Lịch bảo trì đã được tạo thành công.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Có lỗi xảy ra: {ex.Message}");
             }
         }
 

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using ReadExcelProcess.Constant;
 using ReadExcelProcess.Model;
 
 namespace ReadExcelProcess.Service
@@ -90,7 +91,8 @@ namespace ReadExcelProcess.Service
                             PlaceOfIssue = placeOfIssue,
                             Account = account,
                             Branch = branch,
-                            Region = currentRegion
+                            Region = currentRegion,
+                            ProvinceCode = CommonFunction.ConvertToCode(branch)
                         };
 
                         if (existingOfficers.TryGetValue(cccd, out var existingOfficer))
@@ -102,6 +104,7 @@ namespace ReadExcelProcess.Service
                             existingOfficer.Account = account;
                             existingOfficer.Branch = branch;
                             existingOfficer.Region = currentRegion;
+                            existingOfficer.ProvinceCode = CommonFunction.ConvertToCode(branch);
                             officer = existingOfficer;
                         }
                         else

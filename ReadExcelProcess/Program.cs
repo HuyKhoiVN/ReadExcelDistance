@@ -22,6 +22,8 @@ builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
 builder.Services.AddTransient<IDeviceImportService, DeviceImportService>();
 builder.Services.AddTransient<IOfficerImportService, OfficerImportService>();
 builder.Services.AddTransient<IProvinceService, ProvinceService>();
+builder.Services.AddTransient<IContractImportService, ContractImportService>();
+builder.Services.AddTransient<IDeviceMaintenanceService, DeviceMaintenanceService>();
 builder.Services.AddHttpClient<GeoCodingService>();
 builder.Services.AddTransient<IGeoCodingService>(ge =>
 {
