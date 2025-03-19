@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
 using ReadExcelProcess.Model;
 using ReadExcelProcess.Models;
@@ -329,7 +330,8 @@ namespace ReadExcelProcess.Service
             }
 
             // Update coordinates
-            var deviceHaNoi = _dbContext.Devices.Where(d => d.Province.ToLower() == "hn").ToList();
+            
+            var deviceHaNoi = _dbContext.Devices.Where(d => d.Province.Contains("Hà Nội")).ToList();
             if(deviceHaNoi.Any())
             {
                 await UpdateDeviceCoordinates(deviceHaNoi);
@@ -403,6 +405,52 @@ namespace ReadExcelProcess.Service
 
             await _dbContext.SaveChangesAsync();
         }
+
+        //public async Task<List<Device>> GetDevicesByProvince(string provinceName)
+        //{
+        //    var devices = new List<Device>();
+        //    string connectionString = "YourConnectionStringHere"; // Thay bằng chuỗi kết nối của bạn
+
+        //    string query = "SELECT * FROM Devices WHERE LOWER(Province) = @Province";
+
+        //    try
+        //    {
+        //        using (SqlConnection connection = new SqlConnection(connectionString))
+        //        {
+        //            await connection.OpenAsync();
+
+        //            using (SqlCommand command = new SqlCommand(query, connection))
+        //            {
+        //                // Thêm tham số để tránh SQL Injection
+        //                command.Parameters.AddWithValue("@Province", provinceName.ToLower());
+
+        //                using (SqlDataReader reader = await command.ExecuteReaderAsync())
+        //                {
+        //                    while (await reader.ReadAsync())
+        //                    {
+        //                        var device = new Device
+        //                        {
+        //                            Id = reader.GetInt32("Id"),
+        //                            Name = reader.GetString("Name"),
+        //                            Province = reader.GetString("Province"),
+        //                            Latitude = reader.GetDouble("Latitude"),
+        //                            Longitude = reader.GetDouble("Longitude"),
+        //                            IsDeleted = reader.GetBoolean("IsDeleted")
+        //                        };
+        //                        devices.Add(device);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Lỗi khi truy vấn dữ liệu: {ex.Message}");
+        //    }
+
+        //    return devices;
+        //}
+
 
 
         /// <summary>
