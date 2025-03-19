@@ -30,5 +30,22 @@ namespace ReadExcelProcess.Constant
             return stringBuilder.ToString().Normalize(NormalizationForm.FormC).Replace(" ", "");
         }
 
+
+        public static DateTime? ConvertToDateTime(string dateString, int row)
+        {
+            if (string.IsNullOrWhiteSpace(dateString))
+                return null;
+
+            // Định dạng ngày tháng phổ biến trong Excel (dd/MM/yyyy HH:mm)
+            string[] formats = { "dd/MM/yyyy HH:mm", "d/M/yyyy H:m", "dd/MM/yyyy H:m", "d/M/yyyy HH:mm" };
+
+            if (DateTime.TryParseExact(dateString, formats, CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedDate))
+            {
+                return parsedDate;
+            }
+
+            Console.WriteLine($"Không thể chuyển đổi: {dateString} tại {row}");
+            return DateTime.Now;
+        }
     }
 }

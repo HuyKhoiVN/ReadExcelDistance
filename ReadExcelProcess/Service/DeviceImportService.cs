@@ -307,19 +307,14 @@ namespace ReadExcelProcess.Service
 
                     if (existingDevices.TryGetValue(serialNumber, out var existingDevice))
                     {
-                        if (existingDevice.IsDeleted) continue;
-
-                        existingDevice.Address = device.Address;
-                        existingDevice.UpdatedBy = "SystemAdmin";
-                        existingDevice.UpdatedDate = DateTime.Now;
-                        newDevices.Add(device);
+                        continue;
                     }
                     else
                     {
-                        await _dbContext.Devices.AddAsync(device);
                         newDevices.Add(device);
                     }
 
+                    await _dbContext.AddRangeAsync(newDevices);
                     await _dbContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
@@ -328,25 +323,27 @@ namespace ReadExcelProcess.Service
                     continue;
                 }
             }
-
-            // Update coordinates
-            
-            var deviceHaNoi = _dbContext.Devices.Where(d => d.Province.Contains("Hà Nội")).ToList();
-            if(deviceHaNoi.Any())
-            {
-                await UpdateDeviceCoordinates(deviceHaNoi);
-                await CalculateTravelTimes(deviceHaNoi);
-            }
-
-
             // Calculate travel times
 
             _logger.LogInformation("Hoàn tất import và xử lý tọa độ!");
             return newDevices.Select(x => x.Id).ToList();
         }
 
-        private async Task UpdateDeviceCoordinates(List<Device> devices)
+        public async Task<List<int>> ImportCoordinateAndTravelTime(string provinceCode)
         {
+            List<Device> devices = await _dbContext.Devices.Where(d => d.Province ==  provinceCode).ToListAsync();
+
+            if(devices.Any())
+            {
+                await UpdateDeviceCoordinates(devices);
+                await CalculateTravelTimes(devices);
+            }
+
+            return devices.Select(x => x.Id).ToList();
+        }
+        private async Task<List<int>> UpdateDeviceCoordinates(List<Device> devices)
+        {
+            var deviceFail = new List<Device>();
             foreach (var device in devices)
             {
                 try
@@ -360,8 +357,10 @@ namespace ReadExcelProcess.Service
                 catch (Exception)
                 {
                     Console.WriteLine($"Lỗi cập nhật tọa độ cho thiết bị: {device.SerialNumber}");
+                    deviceFail.Add(device);
                 }
             }
+            return deviceFail.Select(x => x.Id).ToList();
         }
 
         private async Task CalculateTravelTimes(List<Device> devicesWithCoordinates)
@@ -405,53 +404,6 @@ namespace ReadExcelProcess.Service
 
             await _dbContext.SaveChangesAsync();
         }
-
-        //public async Task<List<Device>> GetDevicesByProvince(string provinceName)
-        //{
-        //    var devices = new List<Device>();
-        //    string connectionString = "YourConnectionStringHere"; // Thay bằng chuỗi kết nối của bạn
-
-        //    string query = "SELECT * FROM Devices WHERE LOWER(Province) = @Province";
-
-        //    try
-        //    {
-        //        using (SqlConnection connection = new SqlConnection(connectionString))
-        //        {
-        //            await connection.OpenAsync();
-
-        //            using (SqlCommand command = new SqlCommand(query, connection))
-        //            {
-        //                // Thêm tham số để tránh SQL Injection
-        //                command.Parameters.AddWithValue("@Province", provinceName.ToLower());
-
-        //                using (SqlDataReader reader = await command.ExecuteReaderAsync())
-        //                {
-        //                    while (await reader.ReadAsync())
-        //                    {
-        //                        var device = new Device
-        //                        {
-        //                            Id = reader.GetInt32("Id"),
-        //                            Name = reader.GetString("Name"),
-        //                            Province = reader.GetString("Province"),
-        //                            Latitude = reader.GetDouble("Latitude"),
-        //                            Longitude = reader.GetDouble("Longitude"),
-        //                            IsDeleted = reader.GetBoolean("IsDeleted")
-        //                        };
-        //                        devices.Add(device);
-        //                    }
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Lỗi khi truy vấn dữ liệu: {ex.Message}");
-        //    }
-
-        //    return devices;
-        //}
-
-
 
         /// <summary>
         /// Re check if device coordinate is null or == 0
