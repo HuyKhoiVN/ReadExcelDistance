@@ -114,6 +114,30 @@ namespace ReadExcelProcess.Controllers
             }
         }
 
+        [HttpPost("api/import-travel-time")]
+        public async Task<IActionResult> ImportCoordinateAndTravelTime(string provinceCode)
+        {
+            try
+            {
+                var result = await _deviceImportService.ImportCoordinateAndTravelTime(provinceCode);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
         [HttpPost("api/import-provinces")]
         public async Task<IActionResult> ImportProvinceFromExcel(IFormFile file)
         {

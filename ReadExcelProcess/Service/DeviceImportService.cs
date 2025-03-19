@@ -1,6 +1,7 @@
 ﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using OfficeOpenXml;
+using ReadExcelProcess.Constant;
 using ReadExcelProcess.Model;
 using ReadExcelProcess.Models;
 
@@ -280,6 +281,8 @@ namespace ReadExcelProcess.Service
                     var serialNumber = worksheet.Cells[row, 4].Text;
                     if (string.IsNullOrWhiteSpace(serialNumber)) continue;
 
+                    string provinceName = worksheet.Cells[row, 9].Text.Trim();
+
                     var device = new Device
                     {
                         Name = worksheet.Cells[row, 1].Text,
@@ -287,16 +290,18 @@ namespace ReadExcelProcess.Service
                         Family = worksheet.Cells[row, 3].Text,
                         SerialNumber = serialNumber,
                         Contact = worksheet.Cells[row, 5].Text,
-                        DeviceIdNumber = worksheet.Cells[row, 6].Text,
-                        Address = worksheet.Cells[row, 7].Text,
-                        Province = worksheet.Cells[row, 8].Text.Trim(),
-                        Area = worksheet.Cells[row, 9].Text,
+                        DeviceIdNumber = worksheet.Cells[row, 6].Text.Trim(),
+                        Address = worksheet.Cells[row, 7].Text.Trim(),
+                        Province = provinceName,
+                        ProvinceCode = CommonFunction.ConvertToCode(provinceName),
+                        Area = worksheet.Cells[row, 8].Text,
                         Zone = worksheet.Cells[row, 10].Text,
                         Support1 = worksheet.Cells[row, 11].Text,
                         Support2 = worksheet.Cells[row, 12].Text,
                         DeviceStatus = worksheet.Cells[row, 13].Text,
-                        LastChange = DateTime.Now,
+                        LastChange = CommonFunction.ConvertToDateTime(worksheet.Cells[row, 14].Text.Trim(), row),
                         ContractNumber = worksheet.Cells[row, 15].Text,
+                        SubContractNumber = worksheet.Cells[row, 16].Text,    
                         Latitude = 0,
                         Longitude = 0,
                         IsActive = true,
@@ -313,9 +318,6 @@ namespace ReadExcelProcess.Service
                     {
                         newDevices.Add(device);
                     }
-
-                    await _dbContext.AddRangeAsync(newDevices);
-                    await _dbContext.SaveChangesAsync();
                 }
                 catch (Exception ex)
                 {
@@ -325,13 +327,16 @@ namespace ReadExcelProcess.Service
             }
             // Calculate travel times
 
+            await _dbContext.AddRangeAsync(newDevices);
+            await _dbContext.SaveChangesAsync();
+
             _logger.LogInformation("Hoàn tất import và xử lý tọa độ!");
             return newDevices.Select(x => x.Id).ToList();
         }
 
         public async Task<List<int>> ImportCoordinateAndTravelTime(string provinceCode)
         {
-            List<Device> devices = await _dbContext.Devices.Where(d => d.Province ==  provinceCode).ToListAsync();
+            List<Device> devices = await _dbContext.Devices.Where(d => d.ProvinceCode ==  provinceCode).ToListAsync();
 
             if(devices.Any())
             {
