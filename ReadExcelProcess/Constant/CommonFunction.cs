@@ -3,7 +3,7 @@ using System.Text;
 
 namespace ReadExcelProcess.Constant
 {
-    public class CommonFunction
+    public static class CommonFunction
     {
         public static string ConvertToCode(string input)
         {
