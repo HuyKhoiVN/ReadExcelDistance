@@ -7,7 +7,6 @@ namespace ReadExcelProcess.Model
 {
     public partial class SysDbContext : DbContext
     {
-
         public SysDbContext(DbContextOptions<SysDbContext> options)
             : base(options)
         {
@@ -54,8 +53,6 @@ namespace ReadExcelProcess.Model
             {
                 entity.ToTable("Device");
 
-                entity.Property(e => e.Address).HasMaxLength(200);
-
                 entity.Property(e => e.Area).HasMaxLength(100);
 
                 entity.Property(e => e.Class).HasMaxLength(100);
@@ -73,7 +70,7 @@ namespace ReadExcelProcess.Model
                     .HasDefaultValueSql("(getdate())");
 
                 entity.Property(e => e.DeviceIdNumber)
-                    .HasMaxLength(8)
+                    .HasMaxLength(100)
                     .IsUnicode(false)
                     .IsFixedLength();
 
@@ -99,7 +96,14 @@ namespace ReadExcelProcess.Model
 
                 entity.Property(e => e.Province).HasMaxLength(100);
 
+                entity.Property(e => e.ProvinceCode)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .IsFixedLength();
+
                 entity.Property(e => e.SerialNumber).HasMaxLength(50);
+
+                entity.Property(e => e.SubContractNumber).HasMaxLength(300);
 
                 entity.Property(e => e.Support1).HasMaxLength(255);
 
@@ -120,6 +124,10 @@ namespace ReadExcelProcess.Model
                 entity.ToTable("DeviceMaintenanceSchedule");
 
                 entity.Property(e => e.Id).HasColumnName("id");
+
+                entity.Property(e => e.ContractNumber)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.CreatedBy).HasMaxLength(100);
 
@@ -184,6 +192,10 @@ namespace ReadExcelProcess.Model
                 entity.Property(e => e.FullName).HasMaxLength(100);
 
                 entity.Property(e => e.PlaceOfIssue).HasMaxLength(100);
+
+                entity.Property(e => e.ProvinceCode)
+                    .HasMaxLength(50)
+                    .IsUnicode(false);
 
                 entity.Property(e => e.Region).HasMaxLength(100);
 

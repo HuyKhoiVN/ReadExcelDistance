@@ -11,8 +11,8 @@ namespace ReadExcelProcess.Model
         public string Family { get; set; } = null!;
         public string SerialNumber { get; set; } = null!;
         public string Contact { get; set; } = null!;
-        public string DeviceIdNumber { get; set; } = null!;
-        public string Address { get; set; } = null!;
+        public string? DeviceIdNumber { get; set; }
+        public string? Address { get; set; }
         public string Province { get; set; } = null!;
         public string Area { get; set; } = null!;
         public string Zone { get; set; } = null!;
@@ -29,5 +29,7 @@ namespace ReadExcelProcess.Model
         public DateTime CreatedDate { get; set; }
         public string? UpdatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
+        public string ProvinceCode { get; set; } = null!;
+        public string SubContractNumber { get; set; } = null!;
     }
 }
