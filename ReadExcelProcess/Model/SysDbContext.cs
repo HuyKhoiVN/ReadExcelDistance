@@ -7,6 +7,10 @@ namespace ReadExcelProcess.Model
 {
     public partial class SysDbContext : DbContext
     {
+        public SysDbContext()
+        {
+        }
+
         public SysDbContext(DbContextOptions<SysDbContext> options)
             : base(options)
         {
@@ -136,6 +140,8 @@ namespace ReadExcelProcess.Model
                     .HasDefaultValueSql("(getdate())");
 
                 entity.Property(e => e.DeviceId).HasColumnName("device_id");
+
+                entity.Property(e => e.EffectiveDate).HasColumnType("datetime");
 
                 entity.Property(e => e.IsActive)
                     .IsRequired()
