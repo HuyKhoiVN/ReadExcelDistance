@@ -19,10 +19,11 @@ builder.Services.AddTransient<IRepairPersonRepository, RepairPersonRepository>()
 builder.Services.AddTransient<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
-//builder.Services.AddTransient<IDeviceImportService, DeviceImportService>();
+builder.Services.AddTransient<IDeviceImportService, DeviceImportService>();
 builder.Services.AddTransient<IOfficerImportService, OfficerImportService>();
 builder.Services.AddTransient<IProvinceService, ProvinceService>();
 builder.Services.AddTransient<IContractImportService, ContractImportService>();
+builder.Services.AddTransient<IDeviceMaintenanceService, DeviceMaintenanceService>();
 builder.Services.AddHttpClient<GeoCodingService>();
 builder.Services.AddTransient<IGeoCodingService>(ge =>
 {
