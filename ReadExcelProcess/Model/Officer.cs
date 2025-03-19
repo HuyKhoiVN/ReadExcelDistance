@@ -14,5 +14,6 @@ namespace ReadExcelProcess.Model
         public string? Account { get; set; }
         public string? Branch { get; set; }
         public string? Region { get; set; }
+        public string? ProvinceCode { get; set; }
     }
 }

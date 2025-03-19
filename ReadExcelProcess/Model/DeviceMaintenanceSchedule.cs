@@ -16,5 +16,7 @@ namespace ReadExcelProcess.Model
         public string? UpdatedBy { get; set; }
         public DateTime? UpdatedDate { get; set; }
         public int MaintenanceTimes { get; set; }
+        public string? ContractNumber { get; set; }
+        public DateTime? EffectiveDate { get; set; }
     }
 }

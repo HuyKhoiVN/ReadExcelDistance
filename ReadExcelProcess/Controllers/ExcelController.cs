@@ -93,29 +93,53 @@ namespace ReadExcelProcess.Controllers
             return Ok(result);
         }
 
-        //[HttpPost("api/import-devices")]
-        //public async Task<IActionResult> ImportDevicesFromExcel(IFormFile file)
-        //{
-        //    try
-        //    {
-        //        var result = await _deviceImportService.ImportDevicesFromExcel(file);
+        [HttpPost("api/import-devices")]
+        public async Task<IActionResult> ImportDevicesFromExcel(IFormFile file)
+        {
+            try
+            {
+                var result = await _deviceImportService.ImportDevicesFromExcel(file);
 
-        //        return Ok(new
-        //        {
-        //            Status = "Success",
-        //            Total = result.Count,
-        //            Data = result
-        //        });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(new
-        //        {
-        //            Status = "Error",
-        //            Message = ex.Message
-        //        });
-        //    }
-        //}
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
+
+        [HttpPost("api/import-travel-time")]
+        public async Task<IActionResult> ImportCoordinateAndTravelTime(string provinceCode)
+        {
+            try
+            {
+                var result = await _deviceImportService.ImportCoordinateAndTravelTime(provinceCode);
+
+                return Ok(new
+                {
+                    Status = "Success",
+                    Total = result.Count,
+                    Data = result
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Status = "Error",
+                    Message = ex.Message
+                });
+            }
+        }
 
         [HttpPost("api/import-officer")]
         public async Task<IActionResult> ImportOfficerFromExcel(IFormFile file)
