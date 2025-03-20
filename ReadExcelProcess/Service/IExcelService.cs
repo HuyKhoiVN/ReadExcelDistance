@@ -1,4 +1,5 @@
-﻿using ReadExcelProcess.Models;
+﻿using ReadExcelProcess.DTO;
+using ReadExcelProcess.Models;
 
 namespace ReadExcelProcess.Service
 {
@@ -11,5 +12,6 @@ namespace ReadExcelProcess.Service
         Task<byte[]> GetFile(IFormFile file);
 
         Task<byte[]> Export(List<RepairPerson> model);
+        Task<byte[]> ExportDivisionDay(InputData inputData);
     }
 }
