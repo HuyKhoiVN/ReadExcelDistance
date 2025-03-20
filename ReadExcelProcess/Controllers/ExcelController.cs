@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using ReadExcelProcess.DTO;
 using ReadExcelProcess.Service;
 
 namespace ReadExcelProcess.Controllers
@@ -227,6 +228,16 @@ namespace ReadExcelProcess.Controllers
             {
                 return StatusCode(500, $"Có lỗi xảy ra: {ex.Message}");
             }
+        }
+
+        [HttpPost("api/export-divisionDay")]
+        public async Task<IActionResult> ExportExcel([FromBody] InputData inputData)
+        {
+            var fileContent = await _excelService.ExportDivisionDay(inputData);
+
+            string fileName = $"DivisionDay_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+            return File(fileContent, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
         }
 
         private List<List<double>> ConvertMatrixToList(double[,] matrix)
