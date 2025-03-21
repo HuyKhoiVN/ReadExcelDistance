@@ -16,7 +16,6 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddHttpClient();
 builder.Services.AddTransient<IRepairPersonRepository, RepairPersonRepository>();
-builder.Services.AddTransient<IAssignmentService, AssignmentService>();
 builder.Services.AddTransient<IExcelService, ExcelService>();
 builder.Services.AddTransient<IDistanceMatrixService, DistanceMatrixService>();
 builder.Services.AddTransient<IDeviceImportService, DeviceImportService>();
@@ -50,11 +49,11 @@ app.UseEndpoints(endpoints =>
 {
     endpoints.MapControllerRoute(
         name: "default",
-        pattern: "{controller=Excel}/{action=home}");
+        pattern: "{controller=Home}/{action=index}");
 
     endpoints.MapGet("/", context =>
     {
-        context.Response.Redirect("/Excel/home");
+        context.Response.Redirect("/Home/index");
         return Task.CompletedTask;
     });
 });
