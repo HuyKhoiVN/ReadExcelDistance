@@ -114,9 +114,9 @@ namespace ReadExcelProcess.Service
             return newDevices.Select(x => x.Id).ToList();
         }
 
-        public async Task<List<int>> ImportCoordinateAndTravelTime(string provinceCode)
+        public async Task<List<int>> ImportCoordinateAndTravelTime(string supportCode)
         {
-            List<Device> devices = await _dbContext.Devices.Where(d => d.ProvinceCode ==  provinceCode).ToListAsync();
+            List<Device> devices = await _dbContext.Devices.Where(d => d.Support1 == supportCode).ToListAsync();
 
             if(devices.Any())
             {
@@ -126,6 +126,64 @@ namespace ReadExcelProcess.Service
 
             return devices.Select(x => x.Id).ToList();
         }
+
+        public async Task<List<int>> ImportTravelTimeProvince(List<string> supportCodes, int provinceId)
+        {
+            // Lấy danh sách thiết bị có Support1 khớp 100% với mã trong danh sách supportCodes
+            List<Device> devices = await _dbContext.Devices
+                .Where(d => supportCodes.Any(code => d.Support1.Trim() == code))
+                .ToListAsync();
+
+            // Lấy thông tin tỉnh
+            var province = await _dbContext.Provinces.FirstOrDefaultAsync(x => x.Id == provinceId);
+
+            if (devices.Count < 1 || province == null)
+            {
+                return new List<int>();
+            }
+
+            var origin = new Location { Latitude = province.Latitude, Longitude = province.Longitude };
+            var destinations = devices
+                .Select(d => new Location { Latitude = d.Latitude ?? 0, Longitude = d.Longitude ?? 0 })
+                .ToList();
+
+            // Gọi API tính thời gian di chuyển
+            var distanceMatrix = await _distanceMatrixService.GetTravelTime(origin, destinations);
+            await Task.Delay(250);
+
+            var travelTimes = new List<ProvinceTravelTime>();
+            if (distanceMatrix?.Rows?.Count > 0)
+            {
+                for (int i = 0; i < devices.Count; i++)
+                {
+                    var device = devices[i];
+                    var travelTime = distanceMatrix.Rows[0].Elements[i].Status == "OK"
+                        ? distanceMatrix.Rows[0].Elements[i].Duration.Value / 3600.0
+                        : double.MaxValue;
+
+                    travelTimes.Add(new ProvinceTravelTime
+                    {
+                        ProvinceId = province.Id,
+                        DeviceId = device.Id,
+                        TravelTime = (decimal)travelTime,
+                        IsActive = true,
+                        IsDeleted = false,
+                        CreatedBy = "SystemAdmin",
+                        CreatedDate = DateTime.UtcNow
+                    });
+                }
+            }
+
+            // Lưu dữ liệu vào DB
+            if (travelTimes.Any())
+            {
+                await _dbContext.ProvinceTravelTimes.AddRangeAsync(travelTimes);
+                await _dbContext.SaveChangesAsync();
+            }
+            return travelTimes.Select(x => x.Id).ToList();
+        }
+
+
         private async Task<List<int>> UpdateDeviceCoordinates(List<Device> devices)
         {
             var deviceFail = new List<Device>();

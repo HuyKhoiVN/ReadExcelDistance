@@ -66,11 +66,11 @@ namespace ReadExcelProcess.Controllers
         }
 
         [HttpPost("api/import-travel-time")]
-        public async Task<IActionResult> ImportCoordinateAndTravelTime(string provinceCode)
+        public async Task<IActionResult> ImportCoordinateAndTravelTime(string supportCode)
         {
             try
             {
-                var result = await _deviceImportService.ImportCoordinateAndTravelTime(provinceCode);
+                var result = await _deviceImportService.ImportCoordinateAndTravelTime(supportCode);
 
                 return Ok(new
                 {
@@ -112,6 +112,25 @@ namespace ReadExcelProcess.Controllers
                 });
             }
         }
+
+        [HttpPost("api/import-province-travel-time")]
+        public async Task<IActionResult> ImportProvinceTravel([FromBody] ProvinceTravelDto model)
+        {
+            if (model == null || model.SupportCodes == null || model.SupportCodes.Count == 0)
+            {
+                return BadRequest("Danh sách SupportCode không hợp lệ");
+            }
+
+            var result = await _deviceImportService.ImportTravelTimeProvince(model.SupportCodes, model.ProvinceId);
+
+            if (result.Count == 0)
+            {
+                return NotFound("Không tìm thấy thiết bị hoặc tỉnh thành phù hợp");
+            }
+
+            return Ok(new { Message = "Import thành công " + model.ProvinceId.ToString(), Total = result.Count(), Data = result });
+        }
+
 
         [HttpPost("api/import-provinces")]
         public async Task<IActionResult> ImportProvinceFromExcel(IFormFile file)
